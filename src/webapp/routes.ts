@@ -5,6 +5,8 @@ import { authService } from '../security/AuthService';
 import { config } from '../core/config';
 import { promptService } from '../services/PromptService';
 import { automationService } from '../services/AutomationService';
+import { summaryService } from '../services/SummaryService';
+import { draftService } from '../services/DraftService';
 import { ConfigRepository } from '../data/repositories';
 import { ApiResult, ConfigItem, PromptTemplate, Frequency, Destination, JobStatus } from '../types';
 import { genRequestId } from '../core/logger';
@@ -124,7 +126,25 @@ export function deleteJob(input: { jobId: string }): ApiResult<{ deleted: boolea
   });
 }
 
-/** ทดสอบ AI จริงจาก Web App (กรอกข้อความ → สรุป/ร่าง → เห็นผล) */
+/** สรุปอีเมล 20 ฉบับล่าสุด (เรียกจาก Web App) */
+export function summarizeInbox(_input?: unknown): ApiResult<{ summary: string; model: string; count: number }> {
+  return guard(() => {
+    authService.assertDomain();
+    const threads = GmailApp.getInboxThreads(0, 20);
+    const subjects: string[] = [];
+    for (const t of threads) {
+      const msg = t.getMessages()[0];
+      const from = msg.getFrom();
+      const subj = t.getFirstMessageSubject();
+      const snippet = msg.getPlainBody().slice(0, 200);
+      subjects.push(`- จาก: ${from} | เรื่อง: ${subj} | เนื้อหาย่อ: ${snippet}`);
+    }
+    const content = `อีเมล ${subjects.length} ฉบับล่าสุดใน inbox:\n\n${subjects.join('\n')}`;
+    const email = authService.getCurrentEmail();
+    const res = summaryService.summarize({ content, lang: 'th', userEmail: email });
+    return { summary: res.result, model: res.model, count: subjects.length };
+  });
+}
 export function testAI(input: {
   content: string;
   task: 'summarize' | 'draft';
@@ -135,18 +155,16 @@ export function testAI(input: {
     authService.assertDomain();
     const email = authService.getCurrentEmail();
     if (input.task === 'draft') {
-      const { draftService } = require('../services/DraftService');
       const res = draftService.draftReply({
         content: input.content,
-        tone: input.tone || 'friendly',
-        lang: input.lang,
+        tone: (input.tone as 'formal' | 'concise' | 'friendly') || 'friendly',
+        lang: input.lang as 'th' | 'en',
         userEmail: email,
         bypassFilter: false,
       });
       return { result: res.text, model: res.model, tokens: undefined };
     }
-    const { summaryService } = require('../services/SummaryService');
-    const res = summaryService.summarize({ content: input.content, lang: input.lang, userEmail: email });
+    const res = summaryService.summarize({ content: input.content, lang: input.lang as 'th' | 'en', userEmail: email });
     return { result: res.result, model: res.model, tokens: res.tokens };
   });
 }

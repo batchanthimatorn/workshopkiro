@@ -3,6 +3,7 @@ import { JobRepository } from '../data/repositories';
 import { Job, JobStatus, Frequency, Destination } from '../types';
 import { genRequestId, logger } from '../core/logger';
 import { AppError } from '../core/errors';
+import { secretManager } from '../core/secret';
 import { getAIProvider } from '../ai/AIProvider';
 import { promptService } from './PromptService';
 import { auditLogger } from '../core/audit';
@@ -120,10 +121,16 @@ export class AutomationService {
     const stamp = new Date().toISOString();
     if (job.destination === 'docs' && job.destinationId) {
       DocumentApp.openById(job.destinationId).getBody().appendParagraph(`[${stamp}] ${text}`);
-    } else if (job.destination === 'sheets' && job.destinationId) {
-      SpreadsheetApp.openById(job.destinationId).getSheets()[0].appendRow([stamp, text]);
     } else {
-      logger.info('automation output (no destination configured)', { jobId: job.jobId });
+      // เขียนลงแท็บ "AutoResults" ใน data store sheet เดียวกัน (ไม่ทับ MEMBER/Logs ฯลฯ)
+      const ssId = secretManager.require('SPREADSHEET_ID');
+      const ss = SpreadsheetApp.openById(ssId);
+      let sh = ss.getSheetByName('AutoResults');
+      if (!sh) {
+        sh = ss.insertSheet('AutoResults');
+        sh.appendRow(['timestamp', 'jobId', 'template', 'result']);
+      }
+      sh.appendRow([stamp, job.jobId, job.templateId, text]);
     }
   }
 }

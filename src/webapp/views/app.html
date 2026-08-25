@@ -119,12 +119,41 @@
             <div class="col-6 col-lg-3"><div class="card stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"/></svg></div><div class="stat-value" id="s-fail">-</div><div class="stat-label">Failures</div></div></div>
             <div class="col-6 col-lg-3"><div class="card stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div><div class="stat-value" id="s-provider" style="font-size:1.3rem">-</div><div class="stat-label">Provider</div></div></div>
           </div>
+          <div class="card p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="section-title mb-0">สรุปอีเมล 20 ฉบับล่าสุด</div>
+              <button class="btn btn-sm btn-primary" onclick="runInboxSummary()">สรุป Inbox</button>
+            </div>
+            <div id="inbox-result" class="border rounded p-2 bg-light" style="min-height:50px;white-space:pre-wrap;font-size:.9rem"></div>
+          </div>
           <div class="card p-3 mb-3"><div class="section-title">การใช้งานรายเดือน</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>เดือน</th><th>Calls</th><th>Tokens</th><th>Failures</th></tr></thead><tbody id="metrics-body"></tbody></table></div></div>
           <div class="card p-3 mb-3"><div class="section-title">Log ล่าสุด</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>เวลา</th><th>ประเภท</th><th>สถานะ</th><th>Model</th></tr></thead><tbody id="logs-body"></tbody></table></div></div>
           <div class="card p-3"><div class="section-title">Deployment Log</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>Deployment ID</th><th>Version</th><th>Note</th><th>เวลา</th></tr></thead><tbody id="deploy-body"></tbody></table></div></div>
         </section>
 
         <section id="tab-admin" class="d-none">
+          <div class="card p-3 mb-3">
+            <div class="section-title">ทดสอบ AI (สรุป/ร่าง)</div>
+            <textarea id="ai-input" class="form-control mb-2" rows="4" placeholder="วางข้อความที่อยากให้ AI สรุป/ร่างตรงนี้..."></textarea>
+            <div class="d-flex gap-2 mb-2 flex-wrap">
+              <select id="ai-task" class="form-select form-select-sm" style="width:auto"><option value="summarize">สรุป</option><option value="draft">ร่าง</option></select>
+              <select id="ai-lang" class="form-select form-select-sm" style="width:auto"><option value="th">ไทย</option><option value="en">English</option></select>
+              <select id="ai-tone" class="form-select form-select-sm" style="width:auto"><option value="friendly">เป็นมิตร</option><option value="formal">ทางการ</option><option value="concise">กระชับ</option></select>
+              <button class="btn btn-sm btn-primary" onclick="runTestAI()">ส่งให้ AI</button>
+            </div>
+            <div id="ai-result" class="border rounded p-2 bg-light" style="min-height:60px;white-space:pre-wrap"></div>
+          </div>
+
+          <div class="card p-3 mb-3">
+            <div class="section-title">สร้าง Automation Job ใหม่</div>
+            <p class="small text-muted mb-2">ผลลัพธ์จะเขียนลงแท็บ "AutoResults" ใน Google Sheet ของระบบอัตโนมัติ</p>
+            <div class="row g-2 align-items-end">
+              <div class="col-sm-5"><label class="form-label small">Prompt Template</label><select id="job-tmpl" class="form-select form-select-sm"></select></div>
+              <div class="col-sm-3"><label class="form-label small">ความถี่</label><select id="job-freq" class="form-select form-select-sm"><option value="daily">รายวัน (08:00)</option><option value="hourly">รายชั่วโมง</option></select></div>
+              <div class="col-sm-4"><button class="btn btn-sm btn-primary w-100" onclick="createNewJob()">สร้าง Job</button></div>
+            </div>
+          </div>
+
           <div class="card p-3 mb-3"><div class="section-title">Config</div><div class="table-wrap"><table class="table table-sm align-middle"><thead><tr><th>Key</th><th>Value</th><th>Category</th><th></th></tr></thead><tbody id="config-body"></tbody></table></div></div>
           <div class="card p-3 mb-3"><div class="section-title">Prompt Templates</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>Name</th><th>Task</th><th>Lang</th><th>Active</th></tr></thead><tbody id="prompts-body"></tbody></table></div></div>
           <div class="card p-3"><div class="section-title">Automation Jobs</div><div class="table-wrap"><table class="table table-sm align-middle"><thead><tr><th>Job</th><th>Template</th><th>ความถี่</th><th>ปลายทาง</th><th>สถานะ</th><th></th></tr></thead><tbody id="jobs-body"></tbody></table></div></div>
@@ -187,12 +216,55 @@
     }
     function loadAdmin() {
       call('listConfig').then(function (r) { var d = handle(r); if (!d) return; document.getElementById('config-body').innerHTML = d.map(function (c) { return '<tr><td>' + esc(c.key) + '</td><td><input class="form-control form-control-sm cfg-val" data-key="' + esc(c.key) + '" data-cat="' + esc(c.category) + '" value="' + esc(c.value) + '"></td><td>' + esc(c.category) + '</td><td><button class="btn btn-sm btn-primary" onclick="saveCfg(\'' + esc(c.key) + '\')">บันทึก</button></td></tr>'; }).join(''); });
-      call('listPrompts').then(function (r) { var d = handle(r); if (!d) return; document.getElementById('prompts-body').innerHTML = d.map(function (p) { return '<tr><td>' + esc(p.name) + '</td><td>' + esc(p.taskType) + '</td><td>' + esc(p.language) + '</td><td>' + esc(p.active) + '</td></tr>'; }).join('') || '<tr><td colspan="4" class="empty">ยังไม่มี template</td></tr>'; });
+      call('listPrompts').then(function (r) { var d = handle(r); if (!d) return; document.getElementById('prompts-body').innerHTML = d.map(function (p) { return '<tr><td>' + esc(p.name) + '</td><td>' + esc(p.taskType) + '</td><td>' + esc(p.language) + '</td><td>' + esc(p.active) + '</td></tr>'; }).join('') || '<tr><td colspan="4" class="empty">ยังไม่มี template</td></tr>'; populateTemplateDropdown(d); });
       call('listJobs').then(function (r) { var d = handle(r); if (!d) return; document.getElementById('jobs-body').innerHTML = d.map(function (j) { var toggle = j.status === 'active' ? 'paused' : 'active'; return '<tr><td>' + esc(j.jobId).slice(0, 8) + '</td><td>' + esc(j.templateId) + '</td><td>' + esc(j.frequency) + '</td><td>' + esc(j.destination) + '</td><td>' + esc(j.status) + '</td><td><button class="btn btn-sm btn-outline-secondary me-1" onclick="toggleJob(\'' + esc(j.jobId) + '\',\'' + toggle + '\')">' + (j.status === 'active' ? 'หยุด' : 'เริ่ม') + '</button><button class="btn btn-sm btn-outline-danger" onclick="delJob(\'' + esc(j.jobId) + '\')">ลบ</button></td></tr>'; }).join('') || '<tr><td colspan="6" class="empty">ยังไม่มีงานอัตโนมัติ</td></tr>'; });
     }
     function saveCfg(key) { var i = document.querySelector('.cfg-val[data-key="' + key + '"]'); call('saveConfig', { key: key, value: i.value, category: i.dataset.cat }).then(function (r) { if (handle(r)) showAlert('บันทึก config แล้ว', 'success'); }); }
     function toggleJob(id, s) { call('updateJob', { jobId: id, status: s }).then(function (r) { if (handle(r)) loadAdmin(); }); }
     function delJob(id) { call('deleteJob', { jobId: id }).then(function (r) { if (handle(r)) loadAdmin(); }); }
+
+    function runTestAI() {
+      var content = document.getElementById('ai-input').value;
+      if (!content.trim()) { showAlert('กรุณาใส่ข้อความก่อน', 'warning'); return; }
+      document.getElementById('ai-result').textContent = 'กำลังส่งให้ AI...';
+      call('testAI', {
+        content: content,
+        task: document.getElementById('ai-task').value,
+        lang: document.getElementById('ai-lang').value,
+        tone: document.getElementById('ai-tone').value
+      }).then(function (r) {
+        var d = handle(r);
+        if (d) document.getElementById('ai-result').textContent = d.result + '\n\n[model: ' + d.model + (d.tokens ? ' · tokens: ' + d.tokens : '') + ']';
+      }).catch(function (e) { document.getElementById('ai-result').textContent = 'Error: ' + e.message; });
+    }
+
+    function createNewJob() {
+      var tmpl = document.getElementById('job-tmpl').value;
+      if (!tmpl) { showAlert('เลือก Prompt Template ก่อน', 'warning'); return; }
+      call('createJob', {
+        templateId: tmpl,
+        frequency: document.getElementById('job-freq').value,
+        destination: 'sheets',
+        destinationId: undefined
+      }).then(function (r) {
+        if (handle(r)) { showAlert('สร้าง Job สำเร็จ — ผลจะเขียนลงแท็บ AutoResults', 'success'); loadAdmin(); }
+      });
+    }
+
+    function populateTemplateDropdown(prompts) {
+      var sel = document.getElementById('job-tmpl');
+      sel.innerHTML = '<option value="">-- เลือก --</option>' + prompts.map(function (p) {
+        return '<option value="' + esc(p.templateId) + '">' + esc(p.name) + ' (' + esc(p.taskType) + ')</option>';
+      }).join('');
+    }
+
+    function runInboxSummary() {
+      document.getElementById('inbox-result').textContent = 'กำลังอ่านอีเมล 20 ฉบับ + ส่งให้ AI สรุป... (รอ 15-30 วินาที)';
+      call('summarizeInbox').then(function (r) {
+        var d = handle(r);
+        if (d) document.getElementById('inbox-result').textContent = d.summary + '\n\n[model: ' + d.model + ' · emails: ' + d.count + ']';
+      }).catch(function (e) { document.getElementById('inbox-result').textContent = 'Error: ' + e.message; });
+    }
 
     loadDashboard();
     // auto-refresh ทุก 30 วินาที (ข้อมูลอัปเดตเมื่อใช้ Add-on โดยไม่ต้อง reload หน้า)

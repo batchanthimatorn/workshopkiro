@@ -30,9 +30,8 @@ import {
   updateJob,
   deleteJob,
   testAI,
-} from './webapp/routes';
-
-function onHomepage(e: unknown): GoogleAppsScript.Card_Service.Card {
+  summarizeInbox,
+} from './webapp/routes';function onHomepage(e: unknown): GoogleAppsScript.Card_Service.Card {
   return handleHomepage(e as Record<string, unknown>);
 }
 
@@ -110,4 +109,6 @@ export {
   createJob,
   updateJob,
   deleteJob,
+  testAI,
+  summarizeInbox,
 };

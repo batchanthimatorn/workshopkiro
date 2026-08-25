@@ -12,7 +12,7 @@ const GLOBAL_FUNCS = [
   'onHomepage', 'onGmailMessageOpen', 'onDocsOpen', 'onSummarize', 'onDraft', 'onConfirmSensitive',
   'doGet', 'doPost', 'runScheduledJob', 'setup',
   'getDashboardData', 'getHealthStatus', 'listConfig', 'saveConfig', 'listPrompts', 'savePrompt',
-  'listJobs', 'createJob', 'updateJob', 'deleteJob',
+  'listJobs', 'createJob', 'updateJob', 'deleteJob', 'testAI', 'summarizeInbox',
 ];
 
 // footer: ประกาศ global function จริง delegate ไปยัง AppBundle (ผลลัพธ์ของ IIFE)

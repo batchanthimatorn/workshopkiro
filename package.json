@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "verify": "npm run typecheck && npm run lint && npm test",
     "push": "npm run build && clasp push",
-    "deploy": "npm run build && clasp deploy",
+    "deploy": "npm run build && node scripts/deploy-and-record.mjs",
     "pull": "clasp pull"
   },
   "devDependencies": {
@@ -23,6 +23,7 @@
     "esbuild": "^0.23.0",
     "eslint": "^9.9.0",
     "fast-check": "^3.19.0",
+    "googleapis": "^176.0.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.0",
     "typescript": "~5.8.0",

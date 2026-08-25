@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Generate Architecture Diagram",
+  "description": "Analyze the codebase and generate an architecture diagram. Run manually from the Agent Hooks panel.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered",
+    "patterns": []
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Analyze my codebase and generate an architecture diagram"
+  }
+}

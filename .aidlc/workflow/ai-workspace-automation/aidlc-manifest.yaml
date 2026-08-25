@@ -1,0 +1,114 @@
+version: "1.0.0"
+feature: "ai-workspace-automation"
+language: "th"
+platform: "kiro"
+created: "2026-08-25T10:00:00Z"
+updated: "2026-08-25T10:20:00Z"
+state:
+  status: "active"
+  scope: "new"
+  sharedPhases: [context, requirements, design, tasks]
+  mode: "comprehensive"
+  foundationSkipped: false
+  implementationMode: "standard"
+  quickPath: false
+artifacts:
+  context:
+    status: "approved"
+    timestamp: "2026-08-25T10:05:00Z"
+    files: [context.md]
+  requirements:
+    status: "approved"
+    timestamp: "2026-08-25T10:25:00Z"
+    files: [requirements.md, personas.md]
+  tasks:
+    status: "approved"
+    timestamp: "2026-08-25T11:35:00Z"
+    files: [tasks.md]
+  design:
+    status: "approved"
+    timestamp: "2026-08-25T11:15:00Z"
+    files:
+      - design.md
+      - design/components.md
+      - design/data-model.md
+      - design/api-spec.md
+      - design/integration.md
+      - design/implementation.md
+      - design/operations.md
+      - design/correctness.md
+      - design/testing-strategy.md
+      - design/nfr.md
+implementation:
+  totalTasks: 38
+  completedTasks: 36
+  currentTask: "8.1"
+  currentWave: 8
+context-summary:
+  type: "Greenfield"
+  scope: "new"
+  stack: "TypeScript / Google Apps Script (clasp) / Google Sheets / Gemini API"
+  architecture: "Serverless / Low-code on Google Workspace (Add-on CardService + HTML Service + Web App)"
+  feature: "ระบบผู้ช่วยงานอัตโนมัติบน Google Workspace ด้วย AI — สรุป/ร่างข้อความ, ตั้งงานอัตโนมัติ, deploy code-first ด้วย clasp"
+  impact: "New standalone"
+  complexity: "Medium"
+  teamSize: "solo"
+  recommendations: { personas: true, units: false, nfr: true }
+decisions:
+  requirements:
+    personas: "all 4 (End User, Automation Owner, Developer, Admin)"
+    teamSize: "solo"
+    aiProvider: "AI provider abstraction: Gemini (default, key in Script Properties) + Vertex AI (service account, optional/future) [Add-on]"
+    addonHosts: "Gmail + Google Docs"
+    devIntegrationMode: "mock/dry-run first, then real Gemini API"
+    automationOutput: "Google Sheets + Google Docs"
+    dataStoreScope: "Log + Config + Prompt Registry + Dashboard sheets"
+    securityStories: "explicit (secret mgmt, audit log, sensitive-data filter)"
+    cicdScope: "code-first clasp manual + config; GitHub Actions CI/CD last/optional"
+    aiLanguages: "Thai + English (user selectable)"
+    outOfScope: "auto-send/publish, legacy integration, mobile native app"
+  tasks:
+    buildOrder: "Setup -> FE+mock -> real -> security/monitoring -> test/verify -> CI/CD/deploy(last)"
+    breakdown: "layer/feature mixed (~1-2 days/task)"
+    implApproach: "test-after"
+    integrationStrategy: "mock-first (MockProvider), switch real via config"
+    testTasks: "unit per feature + property (filter/backoff/masking) + verify"
+    execution: "sequential (solo)"
+    cicdDeploy: "last wave / optional"
+  design:
+    tsBuild: "esbuild bundle src -> dist/Code.gs, clasp push from dist [Add-on 2026-08-25]"
+    addonType: "Google Workspace Add-on (Gmail + Docs)"
+    webAppRender: "HtmlService templated HTML + Bootstrap"
+    sheetsDataAccess: "typed Repository/DAO wrapper over SpreadsheetApp"
+    geminiModel: "Gemini Flash default via GeminiProvider (AIProvider abstraction; Vertex AI optional)"
+    aiContract: "JSON structured (task/prompt/content/lang/tone -> result/tokens/model)"
+    cache: "CacheService, key=hash(content+prompt+lang/tone), TTL"
+    errorRetry: "try/catch + AppError + exponential backoff (<=3)"
+    configSecret: "Script Properties (secret/config) + Config Sheet (business rules)"
+    testFramework: "Jest + mocked Google globals"
+    correctnessTesting: "example-based primary + property-based for sensitive-data filter"
+    observability: "Standard (logging + metrics/Dashboard + health + Cloud Logging)"
+    errorTracking: "Cloud-native (GCP Error Reporting + Cloud Logging)"
+    healthLifecycle: "basic health check endpoint"
+    targetScriptId: "18KyGuenQ6YpqqW_eeMW-TtS0zPieupkLyTymZJ0ojUJ8zMQUcuLvf7wI"
+    targetSpreadsheetId: "10ca8f2tjo2TJ0Skm8KvkwpL8iMzfFgpCH-L6EpAsRcU"
+versions:
+  resolved_at: "2026-08-25T11:00:00Z"
+  source: "mixed"
+  map:
+    node: "20 LTS"
+    "@google/clasp": "3.4.0 (installed global)"
+    typescript: "5.8.x"
+    "@types/google-apps-script": "1.0.x"
+    jest: "29.x"
+    ts-jest: "29.x"
+    fast-check: "3.x"
+    eslint: "9.x"
+    esbuild: "0.23.x (Add-on: bundle src -> dist/Code.gs)"
+  notes: "clasp/typescript web-verified; jest/ts-jest/fast-check/eslint from training knowledge (unverified) — confirm with npm info at setup. TS 7.0 stable Jul 2026 but chose 5.8.x for GAS toolchain stability."
+steering:
+  updatedBy:
+    product: [context, requirements]
+    tech: [context, design]
+    structure: [context, design]
+units: []

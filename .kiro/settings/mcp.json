@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "awsknowledge": {
+      "url": "https://knowledge-mcp.global.api.aws"
+    },
+    "awsiac": {
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-iac-mcp-server@latest"
+      ]
+    },
+    "awspricing": {
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-pricing-mcp-server@latest"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      }
+    },
+    "awslabs.aws-documentation-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-documentation-mcp-server@latest"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_DOCUMENTATION_PARTITION": "aws"
+      },
+      "disabled": true
+    },
+    "draw.io": {
+      "url": "https://mcp.draw.io/mcp",
+      "autoApprove": [
+        "create_diagram",
+        "search_shapes"
+      ]
+    }
+  }
+}

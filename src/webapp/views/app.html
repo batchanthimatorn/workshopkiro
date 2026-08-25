@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Workspace Automation (APP-03)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <style>
+    :root {
+      --blue: #222222;
+      --blue-dark: #111111;
+      --blue-soft: #f0f0f0;
+      --blue-hover: #f5f5f5;
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-2: #555555;
+      --border: #e0e0e0;
+      --success: #2e7d32;
+      --danger: #c62828;
+      --warning: #e65100;
+      --accent: #1a73e8;
+      --radius: 14px;
+      --radius-sm: 9px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.08);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,.10);
+      --sidebar-w: 252px;
+      --dur: 160ms; --ease: cubic-bezier(.4,0,.2,1);
+      --font: "Segoe UI","Noto Sans Thai",Roboto,Arial,sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); }
+    .app { display: flex; min-height: 100vh; }
+
+    /* Sidebar — white + blue, high contrast */
+    .sidebar { width: var(--sidebar-w); background: var(--surface); color: var(--text); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+    .sidebar .brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 700; font-size: 1.05rem; padding: 18px 18px; border-bottom: 1px solid var(--border); }
+    .sidebar .brand .logo { width: 32px; height: 32px; border-radius: 9px; background: var(--blue); display: grid; place-items: center; color: #fff; flex: none; }
+    .sidebar nav { padding: 14px 10px; display: flex; flex-direction: column; gap: 4px; }
+    .nav-side { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 46px; padding: 11px 14px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-2); font-size: .95rem; font-weight: 500; text-align: left; cursor: pointer; transition: background var(--dur) var(--ease), color var(--dur) var(--ease); }
+    .nav-side:hover { background: var(--blue-hover); color: var(--blue-dark); }
+    .nav-side.active { background: var(--blue); color: #fff; font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+    .nav-side svg { width: 20px; height: 20px; flex: none; }
+    .sidebar .foot { margin-top: auto; padding: 14px 18px; font-size: .75rem; color: var(--text-2); border-top: 1px solid var(--border); }
+
+    .content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .topbar { display: flex; align-items: center; gap: 12px; background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; position: sticky; top: 0; z-index: 5; }
+    .topbar h1 { font-size: 1.15rem; margin: 0; font-weight: 700; color: var(--text); }
+    .topbar .sub { color: var(--text-2); font-size: .85rem; }
+    main { padding: 24px 20px 40px; width: 100%; max-width: 1120px; margin-inline: auto; }
+
+    .card { border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); background: var(--surface); }
+    .stat-card { padding: 18px 20px; transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+    .stat-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); border-color: #c9dcff; }
+    .stat-value { font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1.1; }
+    .stat-label { color: var(--text-2); font-size: .85rem; margin-top: 4px; font-weight: 500; }
+    .stat-ic { width: 40px; height: 40px; border-radius: 11px; background: var(--blue-soft); color: var(--text); display: grid; place-items: center; margin-bottom: 12px; }
+    .stat-ic svg { width: 20px; height: 20px; }
+    .section-title { font-size: 1rem; font-weight: 700; margin: 0 0 12px; color: var(--text); }
+    .table-wrap { overflow-x: auto; }
+    table.table { margin: 0; color: var(--text); }
+    table.table td { color: var(--text); }
+    thead th { color: var(--text-2); font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; border-bottom: 2px solid var(--border); white-space: nowrap; }
+    tbody tr:hover { background: #f7faff; }
+    .badge-status { font-size: .78rem; padding: .4em .65em; }
+    .status-ok { color: var(--success); font-weight: 700; }
+    .status-fail { color: var(--danger); font-weight: 700; }
+    .btn-primary { background: var(--blue); border-color: var(--blue); font-weight: 500; }
+    .btn-primary:hover { background: var(--blue-dark); border-color: var(--blue-dark); }
+    .form-control:focus { border-color: var(--text); box-shadow: 0 0 0 3px rgba(0,0,0,.08); }
+    :focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+    .empty { color: var(--text-2); font-style: italic; }
+    @media (max-width: 767.98px) { .sidebar { width: 100%; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar offcanvas-md offcanvas-start" tabindex="-1" id="sidebar" aria-label="เมนูหลัก">
+      <div class="brand">
+        <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 2 3 7v10l9 5 9-5V7l-9-5zm0 2.3 6.5 3.6L12 11.5 5.5 7.9 12 4.3zM5 9.3l6 3.3v6.9l-6-3.3V9.3zm14 0v6.9l-6 3.3v-6.9l6-3.3z"/></svg></span>
+        <span>AI Workspace</span>
+        <button type="button" class="btn-close ms-auto d-md-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="ปิดเมนู"></button>
+      </div>
+      <nav aria-label="เมนูนำทาง">
+        <button class="nav-side active" data-tab="dashboard" type="button" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-side" data-tab="admin" type="button">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8a4 4 0 100 8 4 4 0 000-8zm8.9 4a7 7 0 00-.1-1.2l2-1.6-2-3.4-2.4 1a7.3 7.3 0 00-2-1.2L16 2H8l-.4 2.4a7.3 7.3 0 00-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 003 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1c.6.5 1.3.9 2 1.2L8 22h8l.4-2.4c.7-.3 1.4-.7 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg>
+          <span>Admin</span>
+        </button>
+        <button class="nav-side" data-tab="health" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2 6 4-14 2 8h6"/></svg>
+          <span>Health</span>
+        </button>
+      </nav>
+      <div class="foot">APP-03 · v1.0.0</div>
+    </aside>
+
+    <div class="content">
+      <header class="topbar">
+        <button class="btn btn-outline-primary btn-sm d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-label="เปิดเมนู">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/></svg>
+        </button>
+        <div>
+          <h1 id="page-title">Dashboard</h1>
+          <div class="sub" id="page-sub">ภาพรวมการใช้งานและโควต้า</div>
+        </div>
+      </header>
+
+      <main>
+        <div id="alert" class="alert d-none" role="alert"></div>
+
+        <section id="tab-dashboard">
+          <div class="row g-3 mb-3">
+            <div class="col-6 col-lg-3"><div class="card stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v4H4V4zm0 6h10v10H4V10zm12 0h4v10h-4V10z"/></svg></div><div class="stat-value" id="s-calls">-</div><div class="stat-label">AI calls</div></div></div>
+            <div class="col-6 col-lg-3"><div class="card stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg></div><div class="stat-value" id="s-tokens">-</div><div class="stat-label">Tokens</div></div></div>
+            <div class="col-6 col-lg-3"><div class="card stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"/></svg></div><div class="stat-value" id="s-fail">-</div><div class="stat-label">Failures</div></div></div>
+            <div class="col-6 col-lg-3"><div class="card stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div><div class="stat-value" id="s-provider" style="font-size:1.3rem">-</div><div class="stat-label">Provider</div></div></div>
+          </div>
+          <div class="card p-3 mb-3"><div class="section-title">การใช้งานรายเดือน</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>เดือน</th><th>Calls</th><th>Tokens</th><th>Failures</th></tr></thead><tbody id="metrics-body"></tbody></table></div></div>
+          <div class="card p-3 mb-3"><div class="section-title">Log ล่าสุด</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>เวลา</th><th>ประเภท</th><th>สถานะ</th><th>Model</th></tr></thead><tbody id="logs-body"></tbody></table></div></div>
+          <div class="card p-3"><div class="section-title">Deployment Log</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>Deployment ID</th><th>Version</th><th>Note</th><th>เวลา</th></tr></thead><tbody id="deploy-body"></tbody></table></div></div>
+        </section>
+
+        <section id="tab-admin" class="d-none">
+          <div class="card p-3 mb-3"><div class="section-title">Config</div><div class="table-wrap"><table class="table table-sm align-middle"><thead><tr><th>Key</th><th>Value</th><th>Category</th><th></th></tr></thead><tbody id="config-body"></tbody></table></div></div>
+          <div class="card p-3 mb-3"><div class="section-title">Prompt Templates</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>Name</th><th>Task</th><th>Lang</th><th>Active</th></tr></thead><tbody id="prompts-body"></tbody></table></div></div>
+          <div class="card p-3"><div class="section-title">Automation Jobs</div><div class="table-wrap"><table class="table table-sm align-middle"><thead><tr><th>Job</th><th>Template</th><th>ความถี่</th><th>ปลายทาง</th><th>สถานะ</th><th></th></tr></thead><tbody id="jobs-body"></tbody></table></div></div>
+        </section>
+
+        <section id="tab-health" class="d-none">
+          <div class="card p-3"><div class="section-title">System Health <span id="health-status" class="badge badge-status"></span></div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>Check</th><th>สถานะ</th><th>รายละเอียด</th></tr></thead><tbody id="health-body"></tbody></table></div></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script>
+    var PAGES = {
+      dashboard: { title: 'Dashboard', sub: 'ภาพรวมการใช้งานและโควต้า' },
+      admin: { title: 'Admin', sub: 'จัดการ config, prompt template และงานอัตโนมัติ' },
+      health: { title: 'Health', sub: 'สถานะความพร้อมของระบบ' }
+    };
+    function showAlert(msg, kind) { var el = document.getElementById('alert'); el.classList.remove('d-none'); el.className = 'alert alert-' + (kind || 'danger'); el.textContent = msg; }
+    function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+    function call(fn, args) { return new Promise(function (res, rej) { google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](args); }); }
+    function handle(r) { if (!r || !r.ok) { showAlert((r && r.error && r.error.message) || 'เกิดข้อผิดพลาด', 'danger'); return null; } return r.data; }
+
+    document.querySelectorAll('[data-tab]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var tab = btn.dataset.tab;
+        document.querySelectorAll('[data-tab]').forEach(function (b) { b.classList.remove('active'); b.removeAttribute('aria-current'); });
+        btn.classList.add('active'); btn.setAttribute('aria-current', 'page');
+        ['dashboard', 'admin', 'health'].forEach(function (t) { document.getElementById('tab-' + t).classList.toggle('d-none', t !== tab); });
+        document.getElementById('page-title').textContent = PAGES[tab].title;
+        document.getElementById('page-sub').textContent = PAGES[tab].sub;
+        if (tab === 'admin') loadAdmin();
+        if (tab === 'health') loadHealth();
+        var oc = document.getElementById('sidebar');
+        if (window.bootstrap && bootstrap.Offcanvas) { var inst = bootstrap.Offcanvas.getInstance(oc); if (inst) inst.hide(); }
+      });
+    });
+
+    function loadDashboard() {
+      call('getDashboardData').then(function (r) {
+        var d = handle(r); if (!d) return;
+        document.getElementById('s-calls').textContent = d.totals.aiCalls;
+        document.getElementById('s-tokens').textContent = d.totals.tokensUsed;
+        document.getElementById('s-fail').textContent = d.totals.failures;
+        document.getElementById('metrics-body').innerHTML = d.metrics.map(function (m) { return '<tr><td>' + esc(m.period) + '</td><td>' + esc(m.aiCalls) + '</td><td>' + esc(m.tokensUsed) + '</td><td>' + esc(m.failures) + '</td></tr>'; }).join('') || '<tr><td colspan="4" class="empty">ยังไม่มีข้อมูล</td></tr>';
+        document.getElementById('logs-body').innerHTML = d.recentLogs.map(function (l) { return '<tr><td>' + esc(l.timestamp) + '</td><td>' + esc(l.jobType) + '</td><td>' + esc(l.status) + '</td><td>' + esc(l.model) + '</td></tr>'; }).join('') || '<tr><td colspan="4" class="empty">ยังไม่มี log</td></tr>';
+        document.getElementById('deploy-body').innerHTML = d.deployments.map(function (x) { return '<tr><td>' + esc(x.deploymentId) + '</td><td>' + esc(x.version) + '</td><td>' + esc(x.releaseNote) + '</td><td>' + esc(x.deployedAt) + '</td></tr>'; }).join('') || '<tr><td colspan="4" class="empty">ยังไม่มี deployment</td></tr>';
+      }).catch(function (e) { showAlert('โหลด dashboard ไม่สำเร็จ: ' + e.message); });
+    }
+    function loadHealth() {
+      call('getHealthStatus').then(function (r) {
+        var d = handle(r); if (!d) return;
+        document.getElementById('s-provider').textContent = d.provider;
+        var b = document.getElementById('health-status');
+        b.textContent = d.status === 'ready' ? 'READY' : 'NOT READY';
+        b.className = 'badge badge-status ' + (d.status === 'ready' ? 'bg-success' : 'bg-danger');
+        document.getElementById('health-body').innerHTML = Object.keys(d.checks).map(function (k) { var c = d.checks[k]; var cls = c.status === 'ok' ? 'status-ok' : 'status-fail'; return '<tr><td>' + esc(k) + '</td><td class="' + cls + '">' + esc(c.status) + '</td><td>' + esc(c.detail || '') + '</td></tr>'; }).join('');
+      }).catch(function (e) { showAlert('โหลด health ไม่สำเร็จ: ' + e.message); });
+    }
+    function loadAdmin() {
+      call('listConfig').then(function (r) { var d = handle(r); if (!d) return; document.getElementById('config-body').innerHTML = d.map(function (c) { return '<tr><td>' + esc(c.key) + '</td><td><input class="form-control form-control-sm cfg-val" data-key="' + esc(c.key) + '" data-cat="' + esc(c.category) + '" value="' + esc(c.value) + '"></td><td>' + esc(c.category) + '</td><td><button class="btn btn-sm btn-primary" onclick="saveCfg(\'' + esc(c.key) + '\')">บันทึก</button></td></tr>'; }).join(''); });
+      call('listPrompts').then(function (r) { var d = handle(r); if (!d) return; document.getElementById('prompts-body').innerHTML = d.map(function (p) { return '<tr><td>' + esc(p.name) + '</td><td>' + esc(p.taskType) + '</td><td>' + esc(p.language) + '</td><td>' + esc(p.active) + '</td></tr>'; }).join('') || '<tr><td colspan="4" class="empty">ยังไม่มี template</td></tr>'; });
+      call('listJobs').then(function (r) { var d = handle(r); if (!d) return; document.getElementById('jobs-body').innerHTML = d.map(function (j) { var toggle = j.status === 'active' ? 'paused' : 'active'; return '<tr><td>' + esc(j.jobId).slice(0, 8) + '</td><td>' + esc(j.templateId) + '</td><td>' + esc(j.frequency) + '</td><td>' + esc(j.destination) + '</td><td>' + esc(j.status) + '</td><td><button class="btn btn-sm btn-outline-secondary me-1" onclick="toggleJob(\'' + esc(j.jobId) + '\',\'' + toggle + '\')">' + (j.status === 'active' ? 'หยุด' : 'เริ่ม') + '</button><button class="btn btn-sm btn-outline-danger" onclick="delJob(\'' + esc(j.jobId) + '\')">ลบ</button></td></tr>'; }).join('') || '<tr><td colspan="6" class="empty">ยังไม่มีงานอัตโนมัติ</td></tr>'; });
+    }
+    function saveCfg(key) { var i = document.querySelector('.cfg-val[data-key="' + key + '"]'); call('saveConfig', { key: key, value: i.value, category: i.dataset.cat }).then(function (r) { if (handle(r)) showAlert('บันทึก config แล้ว', 'success'); }); }
+    function toggleJob(id, s) { call('updateJob', { jobId: id, status: s }).then(function (r) { if (handle(r)) loadAdmin(); }); }
+    function delJob(id) { call('deleteJob', { jobId: id }).then(function (r) { if (handle(r)) loadAdmin(); }); }
+
+    loadDashboard();
+    // auto-refresh ทุก 30 วินาที (ข้อมูลอัปเดตเมื่อใช้ Add-on โดยไม่ต้อง reload หน้า)
+    setInterval(function() {
+      var tab = document.querySelector('[data-tab].active');
+      if (!tab || tab.dataset.tab === 'dashboard') loadDashboard();
+      else if (tab.dataset.tab === 'health') loadHealth();
+      else if (tab.dataset.tab === 'admin') loadAdmin();
+    }, 30000);
+  </script>
+</body>
+</html>

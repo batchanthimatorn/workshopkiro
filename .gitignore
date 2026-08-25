@@ -1,0 +1,16 @@
+# dependencies & build output
+node_modules/
+dist/
+coverage/
+
+# clasp / secrets (ห้าม commit)
+.clasprc.json
+.env
+.env.*
+sa-bct-ai-2026.json
+*.pem
+*.key
+
+# misc
+*.log
+.DS_Store

@@ -1,0 +1,6 @@
+# push เฉพาะ build output (rootDir = dist)
+# ignore ทุกอย่างก่อน แล้ว allow เฉพาะไฟล์ที่ต้อง push
+**/**
+!appsscript.json
+!*.gs
+!*.html

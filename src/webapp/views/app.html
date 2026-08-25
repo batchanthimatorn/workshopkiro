@@ -119,13 +119,6 @@
             <div class="col-6 col-lg-3"><div class="card stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"/></svg></div><div class="stat-value" id="s-fail">-</div><div class="stat-label">Failures</div></div></div>
             <div class="col-6 col-lg-3"><div class="card stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div><div class="stat-value" id="s-provider" style="font-size:1.3rem">-</div><div class="stat-label">Provider</div></div></div>
           </div>
-          <div class="card p-3 mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <div class="section-title mb-0">สรุปอีเมล 20 ฉบับล่าสุด</div>
-              <button class="btn btn-sm btn-primary" onclick="runInboxSummary()">สรุป Inbox</button>
-            </div>
-            <div id="inbox-result" class="border rounded p-2 bg-light" style="min-height:50px;white-space:pre-wrap;font-size:.9rem"></div>
-          </div>
           <div class="card p-3 mb-3"><div class="section-title">การใช้งานรายเดือน</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>เดือน</th><th>Calls</th><th>Tokens</th><th>Failures</th></tr></thead><tbody id="metrics-body"></tbody></table></div></div>
           <div class="card p-3 mb-3"><div class="section-title">Log ล่าสุด</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>เวลา</th><th>ประเภท</th><th>สถานะ</th><th>Model</th></tr></thead><tbody id="logs-body"></tbody></table></div></div>
           <div class="card p-3"><div class="section-title">Deployment Log</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>Deployment ID</th><th>Version</th><th>Note</th><th>เวลา</th></tr></thead><tbody id="deploy-body"></tbody></table></div></div>

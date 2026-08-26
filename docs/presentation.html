@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>APP-03 AI Workspace Automation — Presentation & User Guide</title>
+<style>
+:root{--bg:#fafafa;--surface:#fff;--text:#1a1a1a;--text2:#555;--accent:#1a73e8;--border:#e0e0e0;--radius:16px;--font:"Segoe UI","Noto Sans Thai",Roboto,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7}
+.container{max-width:960px;margin:0 auto;padding:40px 24px 80px}
+h1{font-size:2.2rem;font-weight:800;margin-bottom:8px}
+h2{font-size:1.5rem;font-weight:700;margin:48px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--accent)}
+h3{font-size:1.15rem;font-weight:700;margin:28px 0 10px;color:var(--accent)}
+p,.desc{color:var(--text2);margin-bottom:12px}
+.hero{background:linear-gradient(135deg,#1a73e8 0%,#0d47a1 100%);color:#fff;border-radius:var(--radius);padding:48px 36px;margin-bottom:40px;text-align:center}
+.hero h1{color:#fff;font-size:2.4rem;margin-bottom:12px}
+.hero p{color:rgba(255,255,255,.85);font-size:1.1rem;max-width:700px;margin:0 auto}
+.badge{display:inline-block;background:rgba(255,255,255,.2);padding:4px 14px;border-radius:20px;font-size:.85rem;font-weight:600;margin-top:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card-title{font-weight:700;font-size:1rem;margin-bottom:8px}
+.flow{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}
+.flow-step{flex:1;min-width:120px;text-align:center;padding:16px 10px;background:#f0f4ff;border-radius:12px;border:1px solid #d4e3fc;position:relative}
+.flow-step.done{background:#e8f5e9;border-color:#a5d6a7}
+.flow-step .num{display:block;font-size:1.8rem;font-weight:800;color:var(--accent)}
+.flow-step.done .num{color:#2e7d32}
+.flow-step .label{font-size:.8rem;color:var(--text2);margin-top:4px}
+table{width:100%;border-collapse:collapse;margin:16px 0}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border)}
+th{font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.03em;color:var(--text2)}
+.tag{display:inline-block;background:var(--accent);color:#fff;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:600}
+.tag.green{background:#2e7d32}
+.tag.gray{background:#757575}
+ol,ul{margin:8px 0 16px 20px}
+li{margin-bottom:6px}
+code{background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:.9rem}
+.url-box{background:#f5f5f5;border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:.9rem;word-break:break-all;margin:8px 0}
+.section-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:16px 0}
+@media(max-width:600px){.flow{flex-direction:column}.hero{padding:32px 20px}.hero h1{font-size:1.8rem}}
+@media print{body{background:#fff}.hero{background:#1a73e8!important;-webkit-print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+  <h1>AI Workspace Automation</h1>
+  <p>ระบบผู้ช่วยงานอัตโนมัติบน Google Workspace ด้วย AI (APP-03)<br>สรุป/ร่างอีเมล, ตั้งงานอัตโนมัติ, Dashboard ติดตามการใช้งาน</p>
+  <span class="badge">clasp + Google Apps Script + Gemini AI</span>
+</div>
+
+<!-- ======== WORKFLOW ======== -->
+<h2>1. Workflow ที่ใช้พัฒนา (AI-DLC)</h2>
+<p>กระบวนการพัฒนาแบ่งเป็น 7 เฟส (ข้าม Decomposition เพราะเป็น app ก้อนเดียว)</p>
+
+<div class="flow">
+  <div class="flow-step done"><span class="num">1</span><span class="label">Context</span></div>
+  <div class="flow-step done"><span class="num">2</span><span class="label">Requirements</span></div>
+  <div class="flow-step done"><span class="num">3</span><span class="label">Design</span></div>
+  <div class="flow-step done"><span class="num">4</span><span class="label">Tasks</span></div>
+  <div class="flow-step done"><span class="num">5</span><span class="label">Implement</span></div>
+  <div class="flow-step done"><span class="num">6</span><span class="label">Test</span></div>
+  <div class="flow-step done"><span class="num">7</span><span class="label">Deploy</span></div>
+</div>
+
+<table>
+<thead><tr><th>เฟส</th><th>ทำอะไร</th><th>ผลลัพธ์</th></tr></thead>
+<tbody>
+<tr><td>Context</td><td>วิเคราะห์ requirement + scope + tech</td><td>context.md, blueprints</td></tr>
+<tr><td>Requirements</td><td>แปลง FR/NFR เป็น user stories (EARS)</td><td>15 stories + 4 personas</td></tr>
+<tr><td>Design</td><td>ออกแบบ architecture + data + API</td><td>10 เอกสาร design (18 components, 6 entities)</td></tr>
+<tr><td>Tasks</td><td>แตกงานเป็น tasks + ลำดับ</td><td>38 tasks / 10 phases</td></tr>
+<tr><td>Implement</td><td>เขียนโค้ด TypeScript (code-first)</td><td>src/ ครบ 18 components</td></tr>
+<tr><td>Test</td><td>Unit + Property-based tests</td><td>25 tests ผ่าน (จับ bug จริง 2 จุด)</td></tr>
+<tr><td>Deploy</td><td>clasp deploy + Web App live</td><td>Apps Script @17, Web App ใช้งานได้</td></tr>
+</tbody>
+</table>
+
+<!-- ======== TECH STACK ======== -->
+<h2>2. Tech Stack</h2>
+<div class="section-grid">
+  <div class="card"><div class="card-title">Frontend</div>CardService (Add-on Gmail) + HtmlService (Bootstrap Web App)</div>
+  <div class="card"><div class="card-title">Backend</div>Google Apps Script (V8) — TypeScript + esbuild bundle</div>
+  <div class="card"><div class="card-title">Database</div>Google Sheets (6 แท็บ) + Properties Service (secrets)</div>
+  <div class="card"><div class="card-title">AI</div>Gemini 2.5 Flash (UrlFetchApp) — AIProvider abstraction (mock/real)</div>
+  <div class="card"><div class="card-title">DevOps</div>clasp + GitHub Actions (lint/test/build) + auto deploy record</div>
+  <div class="card"><div class="card-title">Security</div>OAuth + RBAC + HITL + sensitive-data filter + PDPA-compliant audit</div>
+</div>
+
+<!-- ======== FEATURES ======== -->
+<h2>3. ฟีเจอร์ที่สร้าง</h2>
+<table>
+<thead><tr><th>ฟีเจอร์</th><th>คำอธิบาย</th><th>สถานะ</th></tr></thead>
+<tbody>
+<tr><td>สรุปอีเมล (FR-01)</td><td>เปิดอีเมลใน Gmail → กด Add-on → AI สรุปเป็นภาษาไทย</td><td><span class="tag green">ใช้งานจริง</span></td></tr>
+<tr><td>ร่างข้อความ (FR-02)</td><td>เลือกโทน/ภาษา → AI สร้าง Gmail Draft (ไม่ส่งเอง)</td><td><span class="tag green">ใช้งานจริง</span></td></tr>
+<tr><td>Automation Jobs (FR-03)</td><td>ตั้งงานอัตโนมัติ (รายวัน/รายชั่วโมง) ผ่านหน้า Admin</td><td><span class="tag green">ใช้งานจริง</span></td></tr>
+<tr><td>Code-first Deploy (FR-04)</td><td>TypeScript + clasp + GitHub Actions (lint/test/build/deploy)</td><td><span class="tag green">ใช้งานจริง</span></td></tr>
+<tr><td>Dashboard</td><td>AI calls / Tokens / Failures / Logs (auto-refresh 30 วิ)</td><td><span class="tag green">ใช้งานจริง</span></td></tr>
+<tr><td>Admin</td><td>จัดการ config, prompt templates, automation jobs, ทดสอบ AI</td><td><span class="tag green">ใช้งานจริง</span></td></tr>
+<tr><td>Health Check</td><td>ตรวจสถานะ API key / Sheets / Domains</td><td><span class="tag green">ใช้งานจริง</span></td></tr>
+<tr><td>Security</td><td>OAuth + RBAC + HITL + banned keywords filter</td><td><span class="tag green">ใช้งานจริง</span></td></tr>
+</tbody>
+</table>
+
+<!-- ======== LINKS ======== -->
+<h2>4. URL ระบบ</h2>
+<div class="card">
+  <div class="card-title">Web App (Dashboard/Admin/Health)</div>
+  <div class="url-box">https://script.google.com/macros/s/AKfycbwCZqbLixa1nZeudOQspCSDcU-wvJrc75ow9mHBcbnH20QFz4r4hAcaDZc0BAuQx_k/exec</div>
+</div>
+<div class="card">
+  <div class="card-title">GitHub Repository</div>
+  <div class="url-box">https://github.com/batchanthimatorn/workshopkiro</div>
+</div>
+<div class="card">
+  <div class="card-title">Apps Script Editor</div>
+  <div class="url-box">https://script.google.com/u/0/home/projects/18KyGuenQ6YpqqW_eeMW-TtS0zPieupkLyTymZJ0ojUJ8zMQUcuLvf7wI/edit</div>
+</div>
+
+<!-- ======== USER GUIDE ======== -->
+<h2>5. คู่มือการใช้งาน</h2>
+
+<h3>5.1 สรุปอีเมลด้วย AI (Gmail Add-on)</h3>
+<ol>
+  <li>เปิด <strong>Gmail</strong> → เปิดอีเมลที่ต้องการสรุป</li>
+  <li>กดไอคอน <strong>"AI Workspace Assistant"</strong> ด้านขวา</li>
+  <li>เลือกภาษา (ไทย / English)</li>
+  <li>กดปุ่ม <strong>"สรุปเนื้อหา"</strong></li>
+  <li>รอ 5-15 วินาที → เห็นผลสรุปจาก Gemini ในการ์ด</li>
+</ol>
+
+<h3>5.2 ร่างข้อความตอบกลับ (Gmail Add-on)</h3>
+<ol>
+  <li>เปิดอีเมลที่ต้องการตอบ</li>
+  <li>เลือกโทน (ทางการ / กระชับ / เป็นมิตร)</li>
+  <li>กดปุ่ม <strong>"ร่างข้อความตอบกลับ"</strong></li>
+  <li>AI สร้างเป็น <strong>Gmail Draft</strong> → ตรวจแก้ → กดส่งเอง</li>
+</ol>
+<p><em>ระบบไม่ส่งอีเมลออกโดยอัตโนมัติ (Human-in-the-loop)</em></p>
+
+<h3>5.3 ทดสอบ AI จากหน้าเว็บ</h3>
+<ol>
+  <li>เปิด Web App → แท็บ <strong>Admin</strong></li>
+  <li>วางข้อความในช่อง "ทดสอบ AI"</li>
+  <li>เลือก สรุป/ร่าง + ภาษา + โทน → กด <strong>"ส่งให้ AI"</strong></li>
+  <li>เห็นผลจาก Gemini ด้านล่าง</li>
+</ol>
+
+<h3>5.4 สร้าง Automation Job</h3>
+<ol>
+  <li>หน้า Admin → "สร้าง Automation Job ใหม่"</li>
+  <li>เลือก Prompt Template + ความถี่ (รายวัน 08:00 / รายชั่วโมง)</li>
+  <li>กด <strong>"สร้าง Job"</strong></li>
+  <li>ผลลัพธ์เขียนลง Google Sheet แท็บ <strong>"AutoResults"</strong></li>
+  <li>หยุด/ลบ Job ได้จากตาราง "Automation Jobs" ด้านล่าง</li>
+</ol>
+
+<h3>5.5 Dashboard</h3>
+<ul>
+  <li>แสดง AI calls / Tokens ที่ใช้ / Failures / Provider</li>
+  <li>ข้อมูล auto-refresh ทุก 30 วินาที (ไม่ต้อง reload)</li>
+  <li>แสดง Log ล่าสุด + Deployment Log</li>
+</ul>
+
+<h3>5.6 จัดการ Config</h3>
+<ul>
+  <li>หน้า Admin → ตาราง Config → แก้ค่าแล้วกด "บันทึก"</li>
+  <li><code>banned_keywords</code> = คำต้องห้ามส่ง AI (คั่นด้วยจุลภาค)</li>
+  <li><code>mock_mode</code> = true (ใช้ mock) / false (ใช้ Gemini จริง)</li>
+  <li><code>gemini_model</code> = ชื่อโมเดล AI ที่ใช้</li>
+</ul>
+
+<h3>5.7 Health Check</h3>
+<ul>
+  <li>แท็บ Health → ตรวจสถานะ READY / NOT READY</li>
+  <li>ตรวจ: API Key, Spreadsheet, Allowed Domains, Provider</li>
+</ul>
+
+<!-- ======== SECURITY ======== -->
+<h2>6. ความปลอดภัย</h2>
+<div class="section-grid">
+  <div class="card"><div class="card-title">Human-in-the-loop</div>AI ไม่ส่งอีเมลเอง — สร้างเป็น Draft เท่านั้น ผู้ใช้ต้องกดส่งเอง</div>
+  <div class="card"><div class="card-title">Sensitive Data Filter</div>ตรวจ banned keywords ก่อนส่ง AI — เตือนและขอยืนยันก่อน</div>
+  <div class="card"><div class="card-title">Secret Management</div>API Key อยู่ใน Script Properties เท่านั้น ไม่ hardcode/ไม่ commit ลง Git</div>
+  <div class="card"><div class="card-title">Audit Log</div>บันทึกทุกการเรียก AI (ไม่เก็บเนื้อหาส่วนบุคคล — PDPA)</div>
+</div>
+
+<!-- ======== DEVELOPER ======== -->
+<h2>7. สำหรับนักพัฒนา</h2>
+<table>
+<thead><tr><th>คำสั่ง</th><th>ทำอะไร</th></tr></thead>
+<tbody>
+<tr><td><code>npm run verify</code></td><td>typecheck + lint + test (ตรวจทั้งหมด)</td></tr>
+<tr><td><code>npm run build</code></td><td>esbuild bundle → dist/Code.gs</td></tr>
+<tr><td><code>npm run push</code></td><td>build + clasp push (dev)</td></tr>
+<tr><td><code>npm run deploy</code></td><td>build + clasp deploy + บันทึก Deployment Log อัตโนมัติ</td></tr>
+<tr><td><code>npm test</code></td><td>รัน unit tests (Jest)</td></tr>
+<tr><td><code>npm run test:pbt</code></td><td>รัน property-based tests (fast-check)</td></tr>
+</tbody>
+</table>
+
+<h3>โครงสร้างโปรเจกต์ (หลัก)</h3>
+<pre style="background:#f5f5f5;padding:16px;border-radius:8px;font-size:.85rem;overflow-x:auto">
+src/
+  addon/        → Add-on UI (CardService)
+  webapp/       → Web App (Dashboard/Admin/Health)
+  services/     → Business logic (Summary, Draft, Automation, Prompt, Monitoring, Health)
+  ai/           → AIProvider (Gemini / Mock)
+  security/     → Auth, SecurityFilter
+  data/         → Repositories (Google Sheets)
+  core/         → Config, Secret, Logger, Errors, Retry
+  types/        → Shared TypeScript types
+tests/          → Jest + fast-check (25 tests)
+dist/           → Build output (clasp push จากที่นี่)
+</pre>
+
+<div style="margin-top:60px;text-align:center;color:var(--text2);font-size:.85rem">
+  <p>สร้างด้วย AI-DLC workflow (Kiro IDE) — APP-03 AI Workspace Automation</p>
+  <p>GitHub: github.com/batchanthimatorn/workshopkiro</p>
+</div>
+
+</div>
+</body>
+</html>

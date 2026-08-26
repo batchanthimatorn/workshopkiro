@@ -77,15 +77,30 @@ export class AutomationService {
     const requestId = genRequestId();
     const start = Date.now();
     try {
+      // อ่าน inbox 20 ฉบับล่าสุด → สรุปหัวจดหมาย + ส่ง AI สรุปรวม
+      const threads = GmailApp.getInboxThreads(0, 20);
+      const subjects: string[] = [];
+      for (const t of threads) {
+        const msg = t.getMessages()[0];
+        const from = msg.getFrom().replace(/<[^>]+>/g, '').trim();
+        const subj = t.getFirstMessageSubject();
+        subjects.push(`${from}: ${subj}`);
+      }
+
       const template = promptService.getTemplate(job.templateId);
-      const prompt = promptService.render(template, { content: '(scheduled run)', lang: template.language });
+      const content = `อีเมล ${subjects.length} ฉบับล่าสุดใน inbox:\n${subjects.map((s, i) => `${i + 1}. ${s}`).join('\n')}`;
+      const prompt = promptService.render(template, { content, lang: template.language });
+
       const res = getAIProvider().generate({
         task: 'automation',
-        content: '(scheduled run)',
+        content,
         prompt,
         lang: template.language,
       });
-      this.writeOutput(job, res.result);
+
+      // เขียนผลลง AutoResults: เวลา, jobId, จำนวนอีเมล, หัวจดหมาย, AI สรุป
+      this.writeOutput(job, subjects.length, subjects, res.result);
+
       job.lastRunAt = new Date().toISOString();
       job.lastRunStatus = 'success';
       this.repo.upsert(job);
@@ -117,20 +132,19 @@ export class AutomationService {
     }
   }
 
-  private writeOutput(job: Job, text: string): void {
+  private writeOutput(job: Job, count: number, subjects: string[], aiSummary: string): void {
     const stamp = new Date().toISOString();
     if (job.destination === 'docs' && job.destinationId) {
-      DocumentApp.openById(job.destinationId).getBody().appendParagraph(`[${stamp}] ${text}`);
+      DocumentApp.openById(job.destinationId).getBody().appendParagraph(`[${stamp}] ${count} emails\n${subjects.join('\n')}\n\nAI: ${aiSummary}`);
     } else {
-      // เขียนลงแท็บ "AutoResults" ใน data store sheet เดียวกัน (ไม่ทับ MEMBER/Logs ฯลฯ)
       const ssId = secretManager.require('SPREADSHEET_ID');
       const ss = SpreadsheetApp.openById(ssId);
       let sh = ss.getSheetByName('AutoResults');
       if (!sh) {
         sh = ss.insertSheet('AutoResults');
-        sh.appendRow(['timestamp', 'jobId', 'template', 'result']);
+        sh.appendRow(['timestamp', 'jobId', 'emailCount', 'subjects', 'aiSummary']);
       }
-      sh.appendRow([stamp, job.jobId, job.templateId, text]);
+      sh.appendRow([stamp, job.jobId, count, subjects.join('\n'), aiSummary]);
     }
   }
 }

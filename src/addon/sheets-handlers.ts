@@ -55,11 +55,24 @@ export function handleSheetsHome(_e: GasEvent): Card {
     .addWidget(CardService.newTextButton().setText('แปลภาษา').setOnClickAction(CardService.newAction().setFunctionName('onSheetTranslate')))
     .addWidget(CardService.newTextButton().setText('ตรวจข้อมูล').setOnClickAction(CardService.newAction().setFunctionName('onSheetCheck')));
 
+  // กลุ่ม 4: AI Chat
+  const chatSection = CardService.newCardSection()
+    .setHeader('AI Chat (พิมพ์ถามอะไรก็ได้)')
+    .addWidget(CardService.newTextInput()
+      .setFieldName('chatMessage')
+      .setTitle('ข้อความ')
+      .setHint('เช่น "แก้สูตร D9", "สร้างกราฟ", "วิเคราะห์ข้อมูล"'))
+    .addWidget(CardService.newTextButton()
+      .setText('ส่งให้ AI')
+      .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
+      .setOnClickAction(CardService.newAction().setFunctionName('onSheetChat')));
+
   return CardService.newCardBuilder()
     .setHeader(CardService.newCardHeader().setTitle('AI Sheets Assistant').setSubtitle('ผู้ช่วย AI สำหรับ Google Sheets'))
     .addSection(analyzeSection)
     .addSection(formulaSection)
     .addSection(toolsSection)
+    .addSection(chatSection)
     .build();
 }
 
@@ -263,6 +276,54 @@ export function handleSheetReportChart(_e: GasEvent): ActionResponse {
     ));
   } catch (err) {
     logger.error('sheet report+chart failed', {});
+    return notify(toUserMessage(err));
+  }
+}
+
+// ---- AI Chat (พิมพ์ถามอะไรก็ได้) ----
+export function handleSheetChat(e: GasEvent): ActionResponse {
+  try {
+    const message = e?.commonEventObject?.formInputs?.chatMessage?.stringInputs?.value?.[0]
+      || e?.formInput?.chatMessage || '';
+    if (!message) return notify('กรุณาพิมพ์ข้อความก่อน');
+
+    // อ่าน cells ที่เลือกเป็น context
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const range = ss.getActiveRange();
+    let context = '';
+    if (range) {
+      const vals = range.getValues();
+      const formulas = range.getFormulas();
+      context = `[เลือก: ${range.getA1Notation()} ใน "${range.getSheet().getName()}"]\nค่า:\n${vals.map((r: unknown[]) => r.join('\t')).join('\n')}\nสูตร:\n${formulas.map((r: string[]) => r.join('\t')).join('\n')}\n\n`;
+    }
+
+    const prompt = `คุณเป็นผู้ช่วย AI สำหรับ Google Sheets ตอบเป็นภาษาไทย ช่วยแก้สูตร วิเคราะห์ข้อมูล สร้างกราฟ ตอบคำถาม ได้หมด\n\n${context}คำถาม: ${message}`;
+    const result = callAI('chat', message, prompt);
+
+    // สร้างการ์ดแสดงผล + ช่องพิมพ์ต่อ
+    const responseSection = CardService.newCardSection()
+      .setHeader('AI ตอบ')
+      .addWidget(CardService.newTextParagraph().setText(result));
+
+    const inputSection = CardService.newCardSection()
+      .addWidget(CardService.newTextInput()
+        .setFieldName('chatMessage')
+        .setTitle('ถามต่อ')
+        .setHint('พิมพ์คำถามเพิ่มเติม...'))
+      .addWidget(CardService.newTextButton()
+        .setText('ส่งให้ AI')
+        .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
+        .setOnClickAction(CardService.newAction().setFunctionName('onSheetChat')));
+
+    const card = CardService.newCardBuilder()
+      .setHeader(CardService.newCardHeader().setTitle('AI Chat').setSubtitle(message.substring(0, 40)))
+      .addSection(responseSection)
+      .addSection(inputSection)
+      .build();
+
+    return pushCard(card);
+  } catch (err) {
+    logger.error('sheet chat failed', {});
     return notify(toUserMessage(err));
   }
 }

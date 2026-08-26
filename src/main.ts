@@ -28,6 +28,7 @@ import {
   handleSheetFixFormula,
   handleSheetReportChart,
   handleSheetConfirmFix,
+  handleSheetChat,
 } from './addon/sheets-handlers';
 import {
   webAppGet,
@@ -101,6 +102,10 @@ function onSheetConfirmFix(e: unknown): GoogleAppsScript.Card_Service.ActionResp
   return handleSheetConfirmFix(e as Record<string, unknown>);
 }
 
+function onSheetChat(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
+  return handleSheetChat(e as Record<string, unknown>);
+}
+
 function doGet(e: unknown): GoogleAppsScript.HTML.HtmlOutput {
   return webAppGet(e);
 }
@@ -128,15 +133,41 @@ function setup(): void {
   initSpreadsheet();
   seedConfig();
   seedPrompts();
-  console.log('setup complete: sheets initialized + config + prompts seeded');
+  // ติดตั้ง installable trigger สำหรับ onOpen (ทำงานได้เต็มสิทธิ์ ไม่ต้อง authorize อีก)
+  installOnOpenTrigger();
+  console.log('setup complete: sheets initialized + config + prompts seeded + onOpen trigger installed');
 }
 
-/** onOpen — สร้าง custom menu "AI Assistant" ใน Sheets (สำหรับเปิด chatbot) */
-function onOpen(): void {
+/** ติดตั้ง installable onOpen trigger — ทำให้เมนู AI Assistant ทำงานได้เลยโดยไม่ต้อง authorize เพิ่ม */
+function installOnOpenTrigger(): void {
+  const ss = SpreadsheetApp.openById(
+    PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID') || ''
+  );
+  // ลบ trigger เก่าที่ชื่อ onOpen/onSheetOpen ก่อน (กัน duplicate)
+  const triggers = ScriptApp.getProjectTriggers();
+  for (const t of triggers) {
+    if (t.getHandlerFunction() === 'onOpen' || t.getHandlerFunction() === 'onSheetOpen') {
+      ScriptApp.deleteTrigger(t);
+    }
+  }
+  // สร้างใหม่ — ใช้ชื่อ onSheetOpen (ไม่ใช่ onOpen เพื่อหลีกเลี่ยง simple trigger conflict)
+  ScriptApp.newTrigger('onSheetOpen')
+    .forSpreadsheet(ss)
+    .onOpen()
+    .create();
+}
+
+/** onSheetOpen — สร้าง custom menu "AI Assistant" ใน Sheets (installable trigger เท่านั้น) */
+function onSheetOpen(): void {
   SpreadsheetApp.getUi()
     .createMenu('AI Assistant')
     .addItem('เปิด AI Chat', 'openChatSidebar')
     .addToUi();
+}
+
+/** onOpen — simple trigger (ว่างเปล่า ไม่เรียก getUi เพื่อหลีกเลี่ยง permission error) */
+function onOpen(): void {
+  // intentionally empty — ใช้ installable trigger (onSheetOpen) แทน
 }
 
 // export ทั้งหมดให้ esbuild (globalName: AppBundle) เปิดออกมา
@@ -159,6 +190,7 @@ export {
   onSheetFixFormula,
   onSheetReportChart,
   onSheetConfirmFix,
+  onSheetChat,
   doGet,
   doPost,
   runScheduledJob,
@@ -176,6 +208,8 @@ export {
   testAI,
   summarizeInbox,
   onOpen,
+  onSheetOpen,
+  installOnOpenTrigger,
   openChatSidebar,
   chatWithAI,
 };

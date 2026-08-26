@@ -146,7 +146,7 @@
 
           <div class="card p-3 mb-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <div><div class="section-title mb-0">สรุปอีเมลล่าสุด (Inbox)</div><div class="small text-muted">กดปุ่ม → อ่าน 20 อีเมลล่าสุด → AI สรุปว่ามีจดหมายเรื่องอะไรบ้าง (ไม่ต้องตั้ง trigger)</div></div>
+              <div><div class="section-title mb-0">สรุปอีเมลล่าสุด (Inbox)</div><div class="small text-muted">กดปุ่ม → อ่าน 5 อีเมลล่าสุด → AI สรุปว่ามีจดหมายเรื่องอะไรบ้าง (ไม่ต้องตั้ง trigger)</div></div>
               <button class="btn btn-sm btn-primary" onclick="runInboxSummary()">สรุปอีเมล</button>
             </div>
             <div id="inbox-result2" class="border rounded p-2" style="min-height:50px;white-space:pre-wrap;font-size:.88rem;background:#f9f9f9"></div>
@@ -251,6 +251,7 @@
 
     function populateTemplateDropdown(prompts) {
       var sel = document.getElementById('job-tmpl');
+      if (!sel) return; // element ถูกลบแล้ว (ไม่มีฟอร์ม Job)
       sel.innerHTML = '<option value="">-- เลือก --</option>' + prompts.map(function (p) {
         return '<option value="' + esc(p.templateId) + '">' + esc(p.name) + ' (' + esc(p.taskType) + ')</option>';
       }).join('');
@@ -258,7 +259,7 @@
 
     function runInboxSummary() {
       var targets = ['inbox-result', 'inbox-result2'];
-      targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = 'กำลังอ่านอีเมล 20 ฉบับ + AI สรุป... (รอ 15-30 วินาที)'; });
+      targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = 'กำลังอ่านอีเมล 5 ฉบับ + AI สรุป... (รอ 10-15 วินาที)'; });
       call('summarizeInbox').then(function (r) {
         var d = handle(r);
         if (d) {

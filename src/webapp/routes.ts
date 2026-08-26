@@ -130,7 +130,7 @@ export function deleteJob(input: { jobId: string }): ApiResult<{ deleted: boolea
 export function summarizeInbox(_input?: unknown): ApiResult<{ summary: string; model: string; count: number }> {
   return guard(() => {
     authService.assertDomain();
-    const threads = GmailApp.getInboxThreads(0, 20);
+    const threads = GmailApp.getInboxThreads(0, 5);
     const subjects: string[] = [];
     for (const t of threads) {
       const msg = t.getMessages()[0];

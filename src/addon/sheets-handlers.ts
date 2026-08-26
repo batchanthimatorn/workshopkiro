@@ -36,21 +36,30 @@ function callAI(_task: string, content: string, prompt: string): string {
 
 // ---- Homepage card (เมื่อเปิด Add-on ใน Sheets) ----
 export function handleSheetsHome(_e: GasEvent): Card {
-  const section = CardService.newCardSection()
-    .addWidget(CardService.newTextParagraph().setText(
-      'AI Assistant สำหรับ Google Sheets\n\nเลือก cells ที่ต้องการ แล้วกดปุ่มด้านล่าง:',
-    ))
-    .addWidget(CardService.newTextButton().setText('วิเคราะห์ข้อมูล').setOnClickAction(CardService.newAction().setFunctionName('onSheetAnalyze')))
+  // กลุ่ม 1: วิเคราะห์
+  const analyzeSection = CardService.newCardSection()
+    .setHeader('วิเคราะห์และสรุป')
+    .addWidget(CardService.newTextParagraph().setText('เลือก cells แล้วกดปุ่ม:'))
+    .addWidget(CardService.newTextButton().setText('วิเคราะห์ข้อมูล').setTextButtonStyle(CardService.TextButtonStyle.FILLED).setOnClickAction(CardService.newAction().setFunctionName('onSheetAnalyze')))
+    .addWidget(CardService.newTextButton().setText('สร้าง Report + กราฟ').setTextButtonStyle(CardService.TextButtonStyle.FILLED).setOnClickAction(CardService.newAction().setFunctionName('onSheetReportChart')));
+
+  // กลุ่ม 2: สูตร
+  const formulaSection = CardService.newCardSection()
+    .setHeader('สูตร')
     .addWidget(CardService.newTextButton().setText('สร้างสูตร').setOnClickAction(CardService.newAction().setFunctionName('onSheetFormula')))
+    .addWidget(CardService.newTextButton().setText('แก้สูตรอัตโนมัติ').setTextButtonStyle(CardService.TextButtonStyle.FILLED).setOnClickAction(CardService.newAction().setFunctionName('onSheetFixFormula')));
+
+  // กลุ่ม 3: เครื่องมือ
+  const toolsSection = CardService.newCardSection()
+    .setHeader('เครื่องมือ')
     .addWidget(CardService.newTextButton().setText('แปลภาษา').setOnClickAction(CardService.newAction().setFunctionName('onSheetTranslate')))
-    .addWidget(CardService.newTextButton().setText('สร้าง Report').setOnClickAction(CardService.newAction().setFunctionName('onSheetReport')))
-    .addWidget(CardService.newTextButton().setText('ตรวจข้อมูล').setOnClickAction(CardService.newAction().setFunctionName('onSheetCheck')))
-    .addWidget(CardService.newDivider())
-    .addWidget(CardService.newTextButton().setText('แก้สูตรอัตโนมัติ').setOnClickAction(CardService.newAction().setFunctionName('onSheetFixFormula')))
-    .addWidget(CardService.newTextButton().setText('สร้าง Report + กราฟ').setOnClickAction(CardService.newAction().setFunctionName('onSheetReportChart')));
+    .addWidget(CardService.newTextButton().setText('ตรวจข้อมูล').setOnClickAction(CardService.newAction().setFunctionName('onSheetCheck')));
+
   return CardService.newCardBuilder()
-    .setHeader(CardService.newCardHeader().setTitle('AI Sheets Assistant'))
-    .addSection(section)
+    .setHeader(CardService.newCardHeader().setTitle('AI Sheets Assistant').setSubtitle('ผู้ช่วย AI สำหรับ Google Sheets'))
+    .addSection(analyzeSection)
+    .addSection(formulaSection)
+    .addSection(toolsSection)
     .build();
 }
 

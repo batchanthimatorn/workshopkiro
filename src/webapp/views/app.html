@@ -119,13 +119,6 @@
             <div class="col-6 col-lg-3"><div class="card stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"/></svg></div><div class="stat-value" id="s-fail">-</div><div class="stat-label">Failures</div></div></div>
             <div class="col-6 col-lg-3"><div class="card stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div><div class="stat-value" id="s-provider" style="font-size:1.3rem">-</div><div class="stat-label">Provider</div></div></div>
           </div>
-          <div class="card p-3 mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <div><div class="section-title mb-0">สรุป Inbox ล่าสุด</div><div class="small text-muted">อ่าน 20 อีเมลล่าสุด + AI สรุปว่ามีเรื่องอะไรบ้าง</div></div>
-              <button class="btn btn-sm btn-primary" onclick="runInboxSummary()">สรุป Inbox</button>
-            </div>
-            <div id="inbox-result" class="border rounded p-2" style="min-height:50px;white-space:pre-wrap;font-size:.88rem;background:#f9f9f9"></div>
-          </div>
           <div class="card p-3 mb-3"><div class="section-title">การใช้งานรายเดือน</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>เดือน</th><th>Calls</th><th>Tokens</th><th>Failures</th></tr></thead><tbody id="metrics-body"></tbody></table></div></div>
           <div class="card p-3 mb-3"><div class="section-title">Log ล่าสุด</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>เวลา</th><th>ประเภท</th><th>สถานะ</th><th>Model</th></tr></thead><tbody id="logs-body"></tbody></table></div></div>
           <div class="card p-3"><div class="section-title">Deployment Log</div><div class="table-wrap"><table class="table table-sm"><thead><tr><th>Deployment ID</th><th>Version</th><th>Note</th><th>เวลา</th></tr></thead><tbody id="deploy-body"></tbody></table></div></div>
@@ -142,14 +135,6 @@
               <button class="btn btn-sm btn-primary" onclick="runTestAI()">ส่งให้ AI</button>
             </div>
             <div id="ai-result" class="border rounded p-2 bg-light" style="min-height:60px;white-space:pre-wrap"></div>
-          </div>
-
-          <div class="card p-3 mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <div><div class="section-title mb-0">สรุปอีเมลล่าสุด (Inbox)</div><div class="small text-muted">กดปุ่ม → อ่าน 5 อีเมลล่าสุด → AI สรุปว่ามีจดหมายเรื่องอะไรบ้าง (ไม่ต้องตั้ง trigger)</div></div>
-              <button class="btn btn-sm btn-primary" onclick="runInboxSummary()">สรุปอีเมล</button>
-            </div>
-            <div id="inbox-result2" class="border rounded p-2" style="min-height:50px;white-space:pre-wrap;font-size:.88rem;background:#f9f9f9"></div>
           </div>
 
           <div class="card p-3 mb-3"><div class="section-title">Config</div><div class="table-wrap"><table class="table table-sm align-middle"><thead><tr><th>Key</th><th>Value</th><th>Category</th><th></th></tr></thead><tbody id="config-body"></tbody></table></div></div>
@@ -265,9 +250,13 @@
         if (d) {
           var text = d.summary + '\n\n[model: ' + d.model + ' | emails: ' + d.count + ']';
           targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = text; });
+        } else {
+          var errText = (r && r.error && r.error.message) ? r.error.message : 'ไม่ทราบสาเหตุ';
+          targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = 'Error: ' + errText; });
         }
       }).catch(function (e) {
-        targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = 'Error: ' + e.message; });
+        var msg = e && e.message ? e.message : String(e);
+        targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = 'Error: ' + msg; });
       });
     }
 

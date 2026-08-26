@@ -52,6 +52,13 @@ export function contextualCard(context: 'gmail' | 'docs'): Card {
         .setText('ร่างข้อความตอบกลับ')
         .setOnClickAction(CardService.newAction().setFunctionName('onDraft')),
     );
+    // ปุ่มสรุป 5 อีเมลล่าสุดจาก inbox
+    section.addWidget(CardService.newDivider());
+    section.addWidget(
+      CardService.newTextButton()
+        .setText('สรุป 5 อีเมลล่าสุด (Inbox)')
+        .setOnClickAction(CardService.newAction().setFunctionName('onSummarizeInbox')),
+    );
   }
 
   return CardService.newCardBuilder()

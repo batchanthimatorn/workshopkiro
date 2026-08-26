@@ -141,7 +141,7 @@ export function summarizeInbox(_input?: unknown): ApiResult<{ summary: string; m
     }
     const content = `อีเมล ${subjects.length} ฉบับล่าสุดใน inbox:\n\n${subjects.join('\n')}`;
     const email = authService.getCurrentEmail();
-    const res = summaryService.summarize({ content, lang: 'th', userEmail: email });
+    const res = summaryService.summarize({ content, lang: 'th', userEmail: email, bypassFilter: true });
     return { summary: res.result, model: res.model, count: subjects.length };
   });
 }

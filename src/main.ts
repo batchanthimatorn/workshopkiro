@@ -16,6 +16,7 @@ import {
   handleSummarize,
   handleDraft,
   handleConfirmSensitive,
+  handleSummarizeInbox,
 } from './addon/handlers';
 import {
   webAppGet,
@@ -53,6 +54,10 @@ function onDraft(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
 
 function onConfirmSensitive(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
   return handleConfirmSensitive(e as Record<string, unknown>);
+}
+
+function onSummarizeInbox(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
+  return handleSummarizeInbox(e as Record<string, unknown>);
 }
 
 function doGet(e: unknown): GoogleAppsScript.HTML.HtmlOutput {
@@ -95,6 +100,7 @@ export {
   onSummarize,
   onDraft,
   onConfirmSensitive,
+  onSummarizeInbox,
   doGet,
   doPost,
   runScheduledJob,

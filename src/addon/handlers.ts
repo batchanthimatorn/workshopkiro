@@ -123,7 +123,26 @@ export function handleDraft(e: GasEvent): ActionResponse {
   }
 }
 
-// HITL: ผู้ใช้ยืนยันหลังพบข้อมูลต้องห้าม -> บันทึกการยืนยัน + ดำเนินการต่อ (bypass filter)
+// สรุป 5 อีเมลล่าสุดจาก inbox (เรียกจาก Add-on)
+export function handleSummarizeInbox(_e: GasEvent): ActionResponse {
+  try {
+    const email = authService.getCurrentEmail();
+    const threads = GmailApp.getInboxThreads(0, 5);
+    const subjects: string[] = [];
+    for (const t of threads) {
+      const msg = t.getMessages()[0];
+      const from = msg.getFrom().replace(/<[^>]+>/g, '').trim();
+      const subj = t.getFirstMessageSubject();
+      subjects.push(`${from}: ${subj}`);
+    }
+    const content = `อีเมล ${subjects.length} ฉบับล่าสุดใน inbox:\n${subjects.map((s, i) => `${i + 1}. ${s}`).join('\n')}`;
+    const res = summaryService.summarize({ content, lang: 'th', userEmail: email, bypassFilter: true });
+    return pushCard(resultCard(`สรุป ${subjects.length} อีเมลล่าสุด`, res.result));
+  } catch (err) {
+    logger.error('summarizeInbox handler failed', {});
+    return notify(toUserMessage(err));
+  }
+}
 export function handleConfirmSensitive(e: GasEvent): ActionResponse {
   try {
     const email = authService.getCurrentEmail();

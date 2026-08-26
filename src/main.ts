@@ -19,6 +19,14 @@ import {
   handleSummarizeInbox,
 } from './addon/handlers';
 import {
+  handleSheetsHome,
+  handleSheetAnalyze,
+  handleSheetFormula,
+  handleSheetTranslate,
+  handleSheetReport,
+  handleSheetCheck,
+} from './addon/sheets-handlers';
+import {
   webAppGet,
   getDashboardData,
   getHealthStatus,
@@ -58,6 +66,25 @@ function onConfirmSensitive(e: unknown): GoogleAppsScript.Card_Service.ActionRes
 
 function onSummarizeInbox(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
   return handleSummarizeInbox(e as Record<string, unknown>);
+}
+
+function onSheetsHome(e: unknown): GoogleAppsScript.Card_Service.Card {
+  return handleSheetsHome(e as Record<string, unknown>);
+}
+function onSheetAnalyze(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
+  return handleSheetAnalyze(e as Record<string, unknown>);
+}
+function onSheetFormula(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
+  return handleSheetFormula(e as Record<string, unknown>);
+}
+function onSheetTranslate(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
+  return handleSheetTranslate(e as Record<string, unknown>);
+}
+function onSheetReport(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
+  return handleSheetReport(e as Record<string, unknown>);
+}
+function onSheetCheck(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
+  return handleSheetCheck(e as Record<string, unknown>);
 }
 
 function doGet(e: unknown): GoogleAppsScript.HTML.HtmlOutput {
@@ -101,6 +128,12 @@ export {
   onDraft,
   onConfirmSensitive,
   onSummarizeInbox,
+  onSheetsHome,
+  onSheetAnalyze,
+  onSheetFormula,
+  onSheetTranslate,
+  onSheetReport,
+  onSheetCheck,
   doGet,
   doPost,
   runScheduledJob,

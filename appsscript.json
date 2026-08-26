@@ -32,6 +32,11 @@
           "onTriggerFunction": "onGmailMessageOpen"
         }
       ]
+    },
+    "sheets": {
+      "homepageTrigger": {
+        "runFunction": "onSheetsHome"
+      }
     }
   },
   "webapp": {

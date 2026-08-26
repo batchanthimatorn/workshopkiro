@@ -280,7 +280,7 @@ export function handleSheetReportChart(_e: GasEvent): ActionResponse {
   }
 }
 
-// ---- AI Chat (พิมพ์ถามอะไรก็ได้) ----
+// ---- AI Chat (พิมพ์ถามอะไรก็ได้ + เขียนลง Sheet จริง) ----
 export function handleSheetChat(e: GasEvent): ActionResponse {
   try {
     const message = e?.commonEventObject?.formInputs?.chatMessage?.stringInputs?.value?.[0]
@@ -291,19 +291,81 @@ export function handleSheetChat(e: GasEvent): ActionResponse {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const range = ss.getActiveRange();
     let context = '';
+    let sheetName = '';
+    let a1 = '';
     if (range) {
       const vals = range.getValues();
       const formulas = range.getFormulas();
-      context = `[เลือก: ${range.getA1Notation()} ใน "${range.getSheet().getName()}"]\nค่า:\n${vals.map((r: unknown[]) => r.join('\t')).join('\n')}\nสูตร:\n${formulas.map((r: string[]) => r.join('\t')).join('\n')}\n\n`;
+      sheetName = range.getSheet().getName();
+      a1 = range.getA1Notation();
+      context = `[เลือก: ${a1} ใน "${sheetName}"]\nค่า:\n${vals.map((r: unknown[]) => r.join('\t')).join('\n')}\nสูตร:\n${formulas.map((r: string[]) => r.join('\t')).join('\n')}\n\n`;
     }
 
-    const prompt = `คุณเป็นผู้ช่วย AI สำหรับ Google Sheets ตอบเป็นภาษาไทย ช่วยแก้สูตร วิเคราะห์ข้อมูล สร้างกราฟ ตอบคำถาม ได้หมด\n\n${context}คำถาม: ${message}`;
+    const prompt = `คุณเป็นผู้ช่วย AI สำหรับ Google Sheets ตอบเป็นภาษาไทย
+ถ้าผู้ใช้ขอให้ทำอะไรกับ Sheet (ใส่สูตร, แก้สูตร, สร้างกราฟ, เพิ่มข้อมูล) ให้ตอบในรูปแบบ:
+[ACTION:FORMULA:cell:formula] เช่น [ACTION:FORMULA:B9:=SUM(B2:B8)]
+[ACTION:VALUE:cell:value] เช่น [ACTION:VALUE:A10:ยอดรวม]
+[ACTION:CHART:range:chartType] เช่น [ACTION:CHART:A1:G8:COLUMN]
+ใส่ได้หลาย ACTION ต่อบรรทัด แล้วอธิบายสิ่งที่ทำด้วย
+ถ้าไม่ต้องทำอะไรกับ Sheet ก็ตอบปกติ
+
+${context}คำถาม: ${message}`;
+
     const result = callAI('chat', message, prompt);
+
+    // Parse actions จาก AI response แล้ว execute
+    const actions: string[] = [];
+    const actionRegex = /\[ACTION:(FORMULA|VALUE|CHART):([^\]]+)\]/g;
+    let match: RegExpExecArray | null;
+    const sheet = range ? range.getSheet() : ss.getActiveSheet();
+
+    while ((match = actionRegex.exec(result)) !== null) {
+      const type = match[1];
+      const params = match[2];
+
+      if (type === 'FORMULA') {
+        const [cell, ...formulaParts] = params.split(':');
+        const formula = formulaParts.join(':'); // formula อาจมี : อยู่ในตัว
+        if (cell && formula) {
+          sheet.getRange(cell).setFormula(formula);
+          actions.push(`ใส่สูตร ${formula} ใน ${cell}`);
+        }
+      } else if (type === 'VALUE') {
+        const [cell, ...valParts] = params.split(':');
+        const val = valParts.join(':');
+        if (cell && val) {
+          const numVal = Number(val);
+          sheet.getRange(cell).setValue(isNaN(numVal) ? val : numVal);
+          actions.push(`ใส่ค่า "${val}" ใน ${cell}`);
+        }
+      } else if (type === 'CHART') {
+        const parts = params.split(':');
+        const chartType = parts.pop() || 'COLUMN';
+        const chartRange = parts.join(':');
+        if (chartRange) {
+          const dataRange = sheet.getRange(chartRange);
+          const chartObj = sheet.newChart()
+            .setChartType((Charts.ChartType as Record<string, GoogleAppsScript.Charts.ChartType>)[chartType] || Charts.ChartType.COLUMN)
+            .addRange(dataRange)
+            .setPosition(dataRange.getRow() + dataRange.getNumRows() + 2, dataRange.getColumn(), 0, 0)
+            .setOption('title', 'AI Generated Chart')
+            .setOption('width', 600)
+            .setOption('height', 350)
+            .build();
+          sheet.insertChart(chartObj);
+          actions.push(`สร้างกราฟ ${chartType} จาก ${chartRange}`);
+        }
+      }
+    }
+
+    // สร้างข้อความแสดงผล
+    const cleanResult = result.replace(/\[ACTION:[^\]]+\]/g, '').trim();
+    const actionSummary = actions.length > 0 ? `\n\n--- ดำเนินการแล้ว ---\n${actions.join('\n')}` : '';
 
     // สร้างการ์ดแสดงผล + ช่องพิมพ์ต่อ
     const responseSection = CardService.newCardSection()
       .setHeader('AI ตอบ')
-      .addWidget(CardService.newTextParagraph().setText(result));
+      .addWidget(CardService.newTextParagraph().setText(cleanResult + actionSummary));
 
     const inputSection = CardService.newCardSection()
       .addWidget(CardService.newTextInput()

@@ -44,7 +44,10 @@ export function handleSheetsHome(_e: GasEvent): Card {
     .addWidget(CardService.newTextButton().setText('สร้างสูตร').setOnClickAction(CardService.newAction().setFunctionName('onSheetFormula')))
     .addWidget(CardService.newTextButton().setText('แปลภาษา').setOnClickAction(CardService.newAction().setFunctionName('onSheetTranslate')))
     .addWidget(CardService.newTextButton().setText('สร้าง Report').setOnClickAction(CardService.newAction().setFunctionName('onSheetReport')))
-    .addWidget(CardService.newTextButton().setText('ตรวจข้อมูล').setOnClickAction(CardService.newAction().setFunctionName('onSheetCheck')));
+    .addWidget(CardService.newTextButton().setText('ตรวจข้อมูล').setOnClickAction(CardService.newAction().setFunctionName('onSheetCheck')))
+    .addWidget(CardService.newDivider())
+    .addWidget(CardService.newTextButton().setText('แก้สูตรอัตโนมัติ').setOnClickAction(CardService.newAction().setFunctionName('onSheetFixFormula')))
+    .addWidget(CardService.newTextButton().setText('สร้าง Report + กราฟ').setOnClickAction(CardService.newAction().setFunctionName('onSheetReportChart')));
   return CardService.newCardBuilder()
     .setHeader(CardService.newCardHeader().setTitle('AI Sheets Assistant'))
     .addSection(section)
@@ -99,4 +102,105 @@ export function handleSheetCheck(_e: GasEvent): ActionResponse {
     const result = callAI('check', data, `ตรวจสอบข้อมูลต่อไปนี้ หาข้อมูลที่ผิดปกติ ซ้ำ ว่าง หรือไม่สอดคล้อง แจ้งเป็นรายการ (ภาษาไทย):\n\n${data}`);
     return pushCard(resultCard('ผลตรวจข้อมูล', result));
   } catch (err) { logger.error('sheet check failed', {}); return notify(toUserMessage(err)); }
+}
+
+
+// ---- แก้สูตรอัตโนมัติ (ตรวจ → AI แก้ → เขียนกลับ cell) ----
+export function handleSheetFixFormula(_e: GasEvent): ActionResponse {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet();
+    const range = sheet.getActiveRange();
+    if (!range) return notify('กรุณาเลือก cells ที่มีสูตรพังก่อน');
+
+    const formulas = range.getFormulas();
+    const values = range.getValues();
+    const numRows = range.getNumRows();
+    const numCols = range.getNumColumns();
+
+    // หา cells ที่มีสูตร + ค่าเป็น error (#NAME?, #REF!, #VALUE!, #ERROR!)
+    const broken: Array<{ row: number; col: number; formula: string; error: string }> = [];
+    for (let r = 0; r < numRows; r++) {
+      for (let c = 0; c < numCols; c++) {
+        const f = formulas[r][c];
+        const v = String(values[r][c]);
+        if (f && (v.startsWith('#') || v === '')) {
+          broken.push({ row: r, col: c, formula: f, error: v });
+        }
+      }
+    }
+
+    if (broken.length === 0) return notify('ไม่พบสูตรที่มี error ใน cells ที่เลือก');
+
+    // ส่งให้ AI แก้
+    const prompt = `แก้สูตร Google Sheets ต่อไปนี้ที่มี error ตอบเฉพาะสูตรที่แก้แล้ว (บรรทัดละ 1 สูตร ตามลำดับ ไม่ต้องมีคำอธิบาย):\n\n` +
+      broken.map((b, i) => `${i + 1}. ${b.formula} → error: ${b.error}`).join('\n');
+
+    const res = getAIProvider().generate({ task: 'summarize', content: prompt, prompt, lang: 'th' });
+
+    // parse ผลจาก AI (แต่ละบรรทัดเป็นสูตรที่แก้แล้ว)
+    const lines = res.result.split('\n').map(l => l.replace(/^\d+\.\s*/, '').trim()).filter(l => l.startsWith('='));
+
+    let fixed = 0;
+    for (let i = 0; i < Math.min(broken.length, lines.length); i++) {
+      const b = broken[i];
+      const newFormula = lines[i];
+      if (newFormula && newFormula !== b.formula) {
+        range.getCell(b.row + 1, b.col + 1).setFormula(newFormula);
+        fixed++;
+      }
+    }
+
+    auditLogger.logUsage({
+      userEmail: currentEmail(), role: 'end_user', jobType: 'other',
+      model: res.model, status: 'success', tokens: res.tokens,
+      durationMs: 0, requestId: genRequestId(),
+    });
+
+    return pushCard(resultCard(
+      `แก้สูตรสำเร็จ (${fixed}/${broken.length})`,
+      `สูตรที่พบ error: ${broken.length}\nแก้ไขแล้ว: ${fixed}\n\n` +
+      broken.map((b, i) => `${b.formula} → ${lines[i] || '(ไม่ได้แก้)'}`).join('\n') +
+      `\n\n[model: ${res.model}]`
+    ));
+  } catch (err) {
+    logger.error('sheet fix formula failed', {});
+    return notify(toUserMessage(err));
+  }
+}
+
+
+// ---- สร้าง Report + กราฟ (สร้าง chart จริงใน Sheet) ----
+export function handleSheetReportChart(_e: GasEvent): ActionResponse {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const range = ss.getActiveRange();
+    if (!range) return notify('กรุณาเลือก cells ข้อมูลก่อน');
+
+    const sheetName = range.getSheet().getName();
+    const a1 = range.getA1Notation();
+
+    // สร้าง chart (bar chart) จากข้อมูลที่เลือก
+    const chart = range.getSheet().newChart()
+      .setChartType(Charts.ChartType.COLUMN)
+      .addRange(range)
+      .setPosition(range.getRow() + range.getNumRows() + 2, range.getColumn(), 0, 0)
+      .setOption('title', 'AI Report Chart')
+      .setOption('legend', { position: 'bottom' })
+      .setOption('width', 600)
+      .setOption('height', 350)
+      .build();
+    range.getSheet().insertChart(chart);
+
+    // AI สรุปข้อมูลด้วย
+    const data = range.getValues().map((row: unknown[]) => row.join('\t')).join('\n');
+    const summary = callAI('report', data, `สรุปข้อมูลต่อไปนี้เป็นรายงานสั้น ๆ (ไทย) พร้อมข้อสังเกตสำคัญ:\n\n${data}`);
+
+    return pushCard(resultCard(
+      'สร้าง Report + กราฟสำเร็จ',
+      `สร้าง chart แล้วที่ Sheet "${sheetName}" (ใต้ข้อมูล ${a1})\n\n--- AI Summary ---\n${summary}`
+    ));
+  } catch (err) {
+    logger.error('sheet report+chart failed', {});
+    return notify(toUserMessage(err));
+  }
 }

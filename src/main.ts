@@ -25,6 +25,8 @@ import {
   handleSheetTranslate,
   handleSheetReport,
   handleSheetCheck,
+  handleSheetFixFormula,
+  handleSheetReportChart,
 } from './addon/sheets-handlers';
 import {
   webAppGet,
@@ -86,6 +88,12 @@ function onSheetReport(e: unknown): GoogleAppsScript.Card_Service.ActionResponse
 function onSheetCheck(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
   return handleSheetCheck(e as Record<string, unknown>);
 }
+function onSheetFixFormula(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
+  return handleSheetFixFormula(e as Record<string, unknown>);
+}
+function onSheetReportChart(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
+  return handleSheetReportChart(e as Record<string, unknown>);
+}
 
 function doGet(e: unknown): GoogleAppsScript.HTML.HtmlOutput {
   return webAppGet(e);
@@ -134,6 +142,8 @@ export {
   onSheetTranslate,
   onSheetReport,
   onSheetCheck,
+  onSheetFixFormula,
+  onSheetReportChart,
   doGet,
   doPost,
   runScheduledJob,

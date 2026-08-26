@@ -3,6 +3,7 @@ import { AIRequest, AIResponse } from '../types';
 import { config } from '../core/config';
 import { MockProvider } from './MockProvider';
 import { GeminiProvider } from './GeminiProvider';
+import { OpenRouterProvider } from './OpenRouterProvider';
 
 export interface AIProvider {
   generate(req: AIRequest): AIResponse;
@@ -10,10 +11,13 @@ export interface AIProvider {
 
 /**
  * เลือก provider ตาม config:
- * - mock_mode = true  -> MockProvider (mock-first, ไม่มี network call) [D1-5]
- * - mock_mode = false -> GeminiProvider (เรียก Gemini จริง, ต้องมี GEMINI_API_KEY)
- * (VertexAIProvider = optional/future ตาม Add-on)
+ * - mock_mode = true  -> MockProvider
+ * - ai_provider = openrouter -> OpenRouterProvider (ใช้ OPENROUTER_API_KEY)
+ * - อื่น ๆ / default -> GeminiProvider (ใช้ GEMINI_API_KEY)
  */
 export function getAIProvider(): AIProvider {
-  return config.isMockMode() ? new MockProvider() : new GeminiProvider();
+  if (config.isMockMode()) return new MockProvider();
+  const provider = config.get('ai_provider', 'gemini').toLowerCase();
+  if (provider === 'openrouter') return new OpenRouterProvider();
+  return new GeminiProvider();
 }

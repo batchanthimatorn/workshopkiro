@@ -24,15 +24,15 @@ function toneInput(): SelectionInput {
 }
 
 export function homepageCard(): Card {
+  const section = CardService.newCardSection()
+    .addWidget(
+      CardService.newTextParagraph().setText(
+        'AI Workspace Assistant\n\nวิธีใช้งาน:\n1. เปิดอีเมลที่ต้องการใน Gmail\n2. กดปุ่ม "สรุปเนื้อหา" หรือ "ร่างข้อความตอบกลับ"\n3. AI จะประมวลผลให้ภายใน 5-15 วินาที\n\nหมายเหตุ: ร่างข้อความจะเป็น Draft เท่านั้น (ไม่ส่งอัตโนมัติ)',
+      ),
+    );
   return CardService.newCardBuilder()
     .setHeader(CardService.newCardHeader().setTitle('AI Workspace Assistant'))
-    .addSection(
-      CardService.newCardSection().addWidget(
-        CardService.newTextParagraph().setText(
-          'ผู้ช่วย AI สำหรับสรุปและร่างข้อความ — เปิดอีเมลใน Gmail หรือเอกสารใน Docs แล้วกดปุ่มเพื่อเริ่มใช้งาน',
-        ),
-      ),
-    )
+    .addSection(section)
     .build();
 }
 
@@ -51,13 +51,6 @@ export function contextualCard(context: 'gmail' | 'docs'): Card {
       CardService.newTextButton()
         .setText('ร่างข้อความตอบกลับ')
         .setOnClickAction(CardService.newAction().setFunctionName('onDraft')),
-    );
-    // ปุ่มสรุป 5 อีเมลล่าสุดจาก inbox
-    section.addWidget(CardService.newDivider());
-    section.addWidget(
-      CardService.newTextButton()
-        .setText('สรุป 5 อีเมลล่าสุด (Inbox)')
-        .setOnClickAction(CardService.newAction().setFunctionName('onSummarizeInbox')),
     );
   }
 

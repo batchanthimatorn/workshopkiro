@@ -242,24 +242,6 @@
       }).join('');
     }
 
-    function runInboxSummary() {
-      var targets = ['inbox-result', 'inbox-result2'];
-      targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = 'กำลังอ่านอีเมล 5 ฉบับ + AI สรุป... (รอ 10-15 วินาที)'; });
-      call('summarizeInbox').then(function (r) {
-        var d = handle(r);
-        if (d) {
-          var text = d.summary + '\n\n[model: ' + d.model + ' | emails: ' + d.count + ']';
-          targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = text; });
-        } else {
-          var errText = (r && r.error && r.error.message) ? r.error.message : 'ไม่ทราบสาเหตุ';
-          targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = 'Error: ' + errText; });
-        }
-      }).catch(function (e) {
-        var msg = e && e.message ? e.message : String(e);
-        targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = 'Error: ' + msg; });
-      });
-    }
-
     loadDashboard();
     // auto-refresh ทุก 30 วินาที (ข้อมูลอัปเดตเมื่อใช้ Add-on โดยไม่ต้อง reload หน้า)
     setInterval(function() {

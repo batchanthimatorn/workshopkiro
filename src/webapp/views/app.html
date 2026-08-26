@@ -145,13 +145,11 @@
           </div>
 
           <div class="card p-3 mb-3">
-            <div class="section-title">สร้าง Automation Job ใหม่</div>
-            <p class="small text-muted mb-2">ผลลัพธ์จะเขียนลงแท็บ "AutoResults" ใน Google Sheet ของระบบอัตโนมัติ</p>
-            <div class="row g-2 align-items-end">
-              <div class="col-sm-5"><label class="form-label small">Prompt Template</label><select id="job-tmpl" class="form-select form-select-sm"></select></div>
-              <div class="col-sm-3"><label class="form-label small">ความถี่</label><select id="job-freq" class="form-select form-select-sm"><option value="daily">รายวัน (08:00)</option><option value="hourly">รายชั่วโมง</option></select></div>
-              <div class="col-sm-4"><button class="btn btn-sm btn-primary w-100" onclick="createNewJob()">สร้าง Job</button></div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div><div class="section-title mb-0">สรุปอีเมลล่าสุด (Inbox)</div><div class="small text-muted">กดปุ่ม → อ่าน 20 อีเมลล่าสุด → AI สรุปว่ามีจดหมายเรื่องอะไรบ้าง (ไม่ต้องตั้ง trigger)</div></div>
+              <button class="btn btn-sm btn-primary" onclick="runInboxSummary()">สรุปอีเมล</button>
             </div>
+            <div id="inbox-result2" class="border rounded p-2" style="min-height:50px;white-space:pre-wrap;font-size:.88rem;background:#f9f9f9"></div>
           </div>
 
           <div class="card p-3 mb-3"><div class="section-title">Config</div><div class="table-wrap"><table class="table table-sm align-middle"><thead><tr><th>Key</th><th>Value</th><th>Category</th><th></th></tr></thead><tbody id="config-body"></tbody></table></div></div>
@@ -259,11 +257,17 @@
     }
 
     function runInboxSummary() {
-      document.getElementById('inbox-result').textContent = 'กำลังอ่านอีเมล 20 ฉบับ + ส่งให้ AI สรุป... (รอ 15-30 วินาที)';
+      var targets = ['inbox-result', 'inbox-result2'];
+      targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = 'กำลังอ่านอีเมล 20 ฉบับ + AI สรุป... (รอ 15-30 วินาที)'; });
       call('summarizeInbox').then(function (r) {
         var d = handle(r);
-        if (d) document.getElementById('inbox-result').textContent = d.summary + '\n\n[model: ' + d.model + ' · emails: ' + d.count + ']';
-      }).catch(function (e) { document.getElementById('inbox-result').textContent = 'Error: ' + e.message; });
+        if (d) {
+          var text = d.summary + '\n\n[model: ' + d.model + ' | emails: ' + d.count + ']';
+          targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = text; });
+        }
+      }).catch(function (e) {
+        targets.forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = 'Error: ' + e.message; });
+      });
     }
 
     loadDashboard();

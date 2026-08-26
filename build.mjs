@@ -14,6 +14,7 @@ const GLOBAL_FUNCS = [
   'doGet', 'doPost', 'runScheduledJob', 'setup',
   'getDashboardData', 'getHealthStatus', 'listConfig', 'saveConfig', 'listPrompts', 'savePrompt',
   'listJobs', 'createJob', 'updateJob', 'deleteJob', 'testAI', 'summarizeInbox',
+  'onOpen', 'openChatSidebar', 'chatWithAI',
 ];
 
 // footer: ประกาศ global function จริง delegate ไปยัง AppBundle (ผลลัพธ์ของ IIFE)

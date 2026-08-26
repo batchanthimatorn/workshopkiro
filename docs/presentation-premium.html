@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>APP-03 AI Workspace Automation — Premium Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{--blue:#8aa7b9;--purple:#c2afd5;--pink:#e2adb7;--navy:#192060;--bg:#fefefe;--surface:#fff;--gray:#f4f5f7;--text:#192060;--muted:#6b7280;--border:#e8eaed;--r:16px;--shadow:0 4px 24px rgba(25,32,96,.06)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh}
+.deck{position:relative;width:100%;height:100vh}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 48px;opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease;pointer-events:none;overflow-y:auto}
+.slide.active{opacity:1;transform:translateY(0);pointer-events:auto}
+h1{font-size:2.8rem;font-weight:800;letter-spacing:-.03em;color:var(--navy);margin-bottom:12px}
+h2{font-size:1.7rem;font-weight:700;color:var(--navy);margin-bottom:20px}
+h3{font-size:.95rem;font-weight:700;color:var(--navy)}
+p{font-size:1rem;line-height:1.9;color:var(--muted);max-width:680px;text-align:center}
+ul{list-style:none;padding:0;text-align:left;max-width:620px}
+li{padding:10px 0;border-bottom:1px solid var(--border);color:var(--muted);font-size:.95rem}
+li::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blue);margin-right:10px;vertical-align:middle}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px;box-shadow:var(--shadow);max-width:800px;width:100%}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;max-width:860px;width:100%}
+.gc{background:var(--gray);border-radius:var(--r);padding:24px 18px;text-align:center;transition:transform .25s,box-shadow .25s}
+.gc:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(25,32,96,.08)}
+.gc p{font-size:.78rem;margin-top:4px}
+.gc i,.gc svg{color:var(--navy)}
+.diagram{background:var(--gray);border-radius:var(--r);padding:32px;max-width:880px;width:100%;text-align:center;line-height:2.4}
+.fb{display:inline-flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);padding:8px 16px;border-radius:10px;font-size:.82rem;font-weight:600;color:var(--navy);margin:4px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.fb.accent{background:var(--blue);color:#fff;border-color:var(--blue)}
+.fb.purple{background:var(--purple);color:#fff;border-color:var(--purple)}
+.fb.pink{background:var(--pink);color:#fff;border-color:var(--pink)}
+.fa{color:var(--muted);margin:0 2px;font-size:1rem}
+.tag{display:inline-block;background:var(--gray);border:1px solid var(--border);padding:4px 12px;border-radius:8px;font-size:.75rem;color:var(--muted);margin:3px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:800px;width:100%}
+.er-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:left;font-size:.78rem}
+.er-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--shadow)}
+.er-box.b{border-left:4px solid var(--blue)}
+.er-box.p{border-left:4px solid var(--purple)}
+.er-box.pk{border-left:4px solid var(--pink)}
+.er-box strong{font-size:.88rem;color:var(--navy)}
+.progress{position:fixed;bottom:0;left:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--purple),var(--pink));transition:width .4s;z-index:99}
+.sn{position:fixed;bottom:14px;right:20px;font-size:.75rem;color:var(--muted);z-index:99}
+@media(max-width:768px){.slide{padding:32px 20px}h1{font-size:2rem}.two-col,.er-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="pg"></div>
+<div class="sn" id="sn"></div>
+<div class="deck">
+
+<!-- 1 -->
+<div class="slide active">
+<h1>AI Workspace<br>Automation</h1>
+<p>ระบบผู้ช่วยงานอัตโนมัติบน Google Workspace ด้วย AI</p>
+<div style="margin-top:20px"><span class="tag">APP-03</span><span class="tag">clasp + GAS</span><span class="tag">Gemini AI</span><span class="tag">OpenRouter</span></div>
+</div>
+
+<!-- 2 -->
+<div class="slide">
+<h2>Project Overview</h2>
+<ul>
+<li>Add-on ผู้ช่วย AI ฝังใน Gmail / Docs / Sheets</li>
+<li>สรุปอีเมล + ร่างข้อความตอบกลับด้วย Gemini</li>
+<li>Sheets AI: วิเคราะห์ / สูตร / แก้สูตร / กราฟ / แปลภาษา</li>
+<li>Dashboard + Health Check + Auto-refresh</li>
+<li>Code-first: TypeScript + esbuild + clasp + CI/CD</li>
+</ul>
+</div>
+
+<!-- 3 -->
+<div class="slide">
+<h2>Business Goal</h2>
+<div class="grid">
+<div class="gc"><i data-lucide="zap" style="width:30px;height:30px"></i><h3>เร็วขึ้น 10x</h3><p>สรุป/ร่างภายใน 15 วิ</p></div>
+<div class="gc"><i data-lucide="shield-check" style="width:30px;height:30px"></i><h3>ปลอดภัย</h3><p>HITL + PDPA + Audit</p></div>
+<div class="gc"><i data-lucide="sparkles" style="width:30px;height:30px"></i><h3>AI ช่วยงาน</h3><p>Gemini + OpenRouter</p></div>
+<div class="gc"><i data-lucide="git-branch" style="width:30px;height:30px"></i><h3>Code-first</h3><p>TS + Git + CI/CD</p></div>
+</div>
+</div>
+
+<!-- 4 -->
+<div class="slide">
+<h2>Problem & Solution</h2>
+<div class="two-col">
+<div class="card" style="border-left:4px solid var(--pink)"><h3 style="color:var(--pink);margin-bottom:10px">Problem</h3><ul><li>อ่านอีเมลยาวเสียเวลา</li><li>สลับเครื่องมือหลายตัว</li><li>สูตร Sheets พังแก้ไม่ถูก</li><li>GAS ควบคุมเวอร์ชันยาก</li></ul></div>
+<div class="card" style="border-left:4px solid var(--blue)"><h3 style="color:var(--blue);margin-bottom:10px">Solution</h3><ul><li>AI สรุป/ร่าง/แปลในที่เดียว</li><li>แก้สูตรอัตโนมัติ (1 กด)</li><li>Code-first + rollback ได้</li><li>Dashboard ภาพรวม</li></ul></div>
+</div>
+</div>
+
+<!-- 5 -->
+<div class="slide">
+<h2>Key Features</h2>
+<div class="grid">
+<div class="gc"><i data-lucide="mail" style="width:26px;height:26px"></i><h3>สรุปอีเมล</h3></div>
+<div class="gc"><i data-lucide="pen-line" style="width:26px;height:26px"></i><h3>ร่างข้อความ</h3></div>
+<div class="gc"><i data-lucide="table-2" style="width:26px;height:26px"></i><h3>Sheets AI</h3></div>
+<div class="gc"><i data-lucide="wrench" style="width:26px;height:26px"></i><h3>แก้สูตรอัตโนมัติ</h3></div>
+<div class="gc"><i data-lucide="bar-chart-3" style="width:26px;height:26px"></i><h3>Report + กราฟ</h3></div>
+<div class="gc"><i data-lucide="activity" style="width:26px;height:26px"></i><h3>Dashboard</h3></div>
+</div>
+</div>
+
+<!-- 6 Architecture -->
+<div class="slide">
+<h2>System Architecture</h2>
+<div class="diagram">
+<span class="fb accent">Gmail / Docs / Sheets</span><br>
+<span class="fa">▼</span><br>
+<span class="fb">Add-on (CardService)</span><span class="fa">|</span><span class="fb">Web App (Dashboard)</span><br>
+<span class="fa">▼</span><br>
+<span class="fb purple">Auth + SecurityFilter + HITL</span><br>
+<span class="fa">▼</span><br>
+<span class="fb">Service Layer (Summary / Draft / Sheets AI / Automation)</span><br>
+<span class="fa">▼</span><br>
+<span class="fb accent">AIProvider</span><span class="fa">→</span><span class="fb pink">Gemini / OpenRouter</span><br>
+<span class="fa">▼</span><br>
+<span class="fb">Google Sheets (6 tabs) + Properties (secrets)</span>
+</div>
+</div>
+
+<!-- 7 Tech -->
+<div class="slide">
+<h2>Technology Stack</h2>
+<div class="grid" style="max-width:640px">
+<div class="gc"><h3>TypeScript</h3><p>+ esbuild</p></div>
+<div class="gc"><h3>Apps Script</h3><p>V8 runtime</p></div>
+<div class="gc"><h3>Gemini AI</h3><p>+ OpenRouter</p></div>
+<div class="gc"><h3>Google Sheets</h3><p>Data store</p></div>
+<div class="gc"><h3>clasp</h3><p>push/deploy</p></div>
+<div class="gc"><h3>GitHub Actions</h3><p>CI/CD</p></div>
+</div>
+</div>
+
+<!-- 8 Business Workflow -->
+<div class="slide">
+<h2>Business Workflow</h2>
+<div class="diagram">
+<span class="fb">เปิดอีเมล/Sheet</span><span class="fa">→</span><span class="fb accent">กด Add-on</span><span class="fa">→</span><span class="fb">เลือกฟังก์ชัน</span><br><br>
+<span class="fa">▼</span><br>
+<span class="fb purple">ตรวจ Sensitive Data</span><span class="fa">→ ถ้าพบ →</span><span class="fb pink">ขอยืนยัน (HITL)</span><br><br>
+<span class="fa">▼ ผ่าน</span><br>
+<span class="fb accent">ส่ง AI (Gemini/OpenRouter)</span><span class="fa">→</span><span class="fb">แสดงผล</span><br><br>
+<span class="fa">▼</span><br>
+<span class="fb">Log (Audit)</span><span class="fa">→</span><span class="fb">Dashboard อัปเดต</span>
+</div>
+</div>
+
+<!-- 9 Role Workflow -->
+<div class="slide">
+<h2>Role Workflow</h2>
+<div class="two-col">
+<div class="card"><h3 style="color:var(--blue)">End User</h3><p style="text-align:left;font-size:.85rem;color:var(--muted);margin-top:8px">เปิดอีเมล → สรุป/ร่าง → ตรวจ → ส่ง Draft<br>เปิด Sheet → วิเคราะห์/แก้สูตร/กราฟ/แปล</p></div>
+<div class="card"><h3 style="color:var(--purple)">Admin</h3><p style="text-align:left;font-size:.85rem;color:var(--muted);margin-top:8px">ตั้ง Config (domains, banned keywords)<br>ดู Dashboard + Audit + Health</p></div>
+<div class="card"><h3 style="color:var(--pink)">Developer</h3><p style="text-align:left;font-size:.85rem;color:var(--muted);margin-top:8px">TypeScript → push → deploy (clasp)<br>CI/CD + Deployment Log + rollback</p></div>
+<div class="card"><h3 style="color:var(--navy)">Automation Owner</h3><p style="text-align:left;font-size:.85rem;color:var(--muted);margin-top:8px">สร้าง Job (ตั้งเวลา AI ทำงาน)<br>หยุด/ลบ Job จากหน้า Admin</p></div>
+</div>
+</div>
+
+<!-- 10 ER Diagram -->
+<div class="slide">
+<h2>ER Diagram</h2>
+<div class="diagram" style="text-align:left;padding:24px">
+<div class="er-grid">
+<div class="er-box b"><strong>Logs</strong><br><span style="color:var(--blue)">PK: logId</span><br>timestamp, userMasked<br>jobType, model, status<br>tokens, requestId</div>
+<div class="er-box p"><strong>Config</strong><br><span style="color:var(--purple)">PK: key</span><br>value, category<br>updatedBy, updatedAt</div>
+<div class="er-box pk"><strong>Prompts</strong><br><span style="color:var(--pink)">PK: templateId</span><br>name, taskType, lang<br>promptText, active</div>
+<div class="er-box b"><strong>Jobs</strong><br><span style="color:var(--blue)">PK: jobId</span><br><span style="color:var(--pink)">FK: templateId → Prompts</span><br>ownerEmail, frequency<br>triggerId, status</div>
+<div class="er-box p"><strong>Dashboard</strong><br><span style="color:var(--purple)">PK: period</span><br>aiCalls, tokensUsed<br>failures, urlFetchCount</div>
+<div class="er-box pk"><strong>Deployments</strong><br><span style="color:var(--pink)">PK: deploymentId</span><br>version, releaseNote<br>deployedAt, status</div>
+</div>
+<p style="margin-top:16px;font-size:.8rem;text-align:center">Jobs.templateId → Prompts <strong>(1:N)</strong> | Jobs → Logs <strong>(1:N per run)</strong> | Logs → Dashboard <strong>(aggregate)</strong></p>
+</div>
+</div>
+
+<!-- 11 Data Flow -->
+<div class="slide">
+<h2>Data Flow</h2>
+<div class="diagram">
+<span class="fb">User</span><span class="fa">→</span><span class="fb accent">Add-on UI</span><span class="fa">→</span><span class="fb purple">Service</span><span class="fa">→</span><span class="fb pink">AI API</span><br><br>
+<span class="fa" style="margin-left:240px">↓ response</span><br><br>
+<span class="fb">Display (Card)</span><span class="fa">←</span><span class="fb purple">AI Result</span><span class="fa">←</span><span class="fb pink">Gemini / OpenRouter</span><br><br>
+<span class="fa">↓ log</span><br><br>
+<span class="fb accent">Google Sheets (Log/Dashboard)</span>
+</div>
+</div>
+
+<!-- 12 Security -->
+<div class="slide">
+<h2>Security Overview</h2>
+<div class="grid" style="max-width:640px">
+<div class="gc" style="border-left:3px solid var(--pink)"><h3>HITL</h3><p>Draft only ไม่ส่งเอง</p></div>
+<div class="gc" style="border-left:3px solid var(--blue)"><h3>Filter</h3><p>Banned keywords ก่อน AI</p></div>
+<div class="gc" style="border-left:3px solid var(--purple)"><h3>Audit</h3><p>Log ทุกครั้ง ไม่เก็บ PII</p></div>
+<div class="gc" style="border-left:3px solid var(--navy)"><h3>Secret</h3><p>Script Properties only</p></div>
+</div>
+</div>
+
+<!-- 13 Benefits -->
+<div class="slide">
+<h2>Business Benefits</h2>
+<div class="grid" style="max-width:700px">
+<div class="gc"><h3>ลดเวลา 80%</h3><p>สรุป/ร่าง 5-15 วิ</p></div>
+<div class="gc"><h3>ลดข้อผิดพลาด</h3><p>AI แก้สูตร + ตรวจข้อมูล</p></div>
+<div class="gc"><h3>ปลอดภัย</h3><p>PDPA + HITL + Audit</p></div>
+<div class="gc"><h3>ต้นทุนต่ำ</h3><p>Serverless (GAS free tier)</p></div>
+<div class="gc"><h3>Deploy เร็ว</h3><p>Code-first + rollback</p></div>
+<div class="gc"><h3>ขยายง่าย</h3><p>เพิ่ม prompt/provider ไม่ redeploy</p></div>
+</div>
+</div>
+
+<!-- 14 Roadmap -->
+<div class="slide">
+<h2>Implementation Roadmap</h2>
+<div class="diagram">
+<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">
+<span class="fb accent">Context</span><span class="fa">→</span>
+<span class="fb">Requirements</span><span class="fa">→</span>
+<span class="fb purple">Design</span><span class="fa">→</span>
+<span class="fb">Tasks</span><span class="fa">→</span>
+<span class="fb accent">Implement</span><span class="fa">→</span>
+<span class="fb pink">Test</span><span class="fa">→</span>
+<span class="fb accent">Deploy</span>
+</div>
+<p style="margin-top:16px;font-size:.88rem">AI-DLC Workflow — 7 เฟส ครบใน 1 session</p>
+</div>
+</div>
+
+<!-- 15 Closing -->
+<div class="slide">
+<h1 style="font-size:3rem">Thank You</h1>
+<p>AI Workspace Automation (APP-03)</p>
+<div style="margin-top:20px"><span class="tag">github.com/batchanthimatorn/workshopkiro</span></div>
+<div style="margin-top:12px"><span class="tag">Web App /exec</span><span class="tag">Gmail Add-on</span><span class="tag">Sheets Add-on</span></div>
+</div>
+
+</div>
+<script>
+lucide.createIcons();
+const S=document.querySelectorAll('.slide');let c=0;
+function go(n){n=Math.max(0,Math.min(S.length-1,n));S[c].classList.remove('active');c=n;S[c].classList.add('active');document.getElementById('pg').style.width=((c/(S.length-1))*100)+'%';document.getElementById('sn').textContent=(c+1)+' / '+S.length;}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(c+1);if(e.key==='ArrowLeft')go(c-1);});
+document.addEventListener('wheel',e=>{e.deltaY>0?go(c+1):go(c-1);},{passive:true});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;});document.addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-tx;if(d<-50)go(c+1);if(d>50)go(c-1);});
+go(0);
+</script>
+</body>
+</html>

@@ -43,6 +43,8 @@ import {
   deleteJob,
   testAI,
   summarizeInbox,
+  openChatSidebar,
+  chatWithAI,
 } from './webapp/routes';function onHomepage(e: unknown): GoogleAppsScript.Card_Service.Card {
   return handleHomepage(e as Record<string, unknown>);
 }
@@ -129,6 +131,14 @@ function setup(): void {
   console.log('setup complete: sheets initialized + config + prompts seeded');
 }
 
+/** onOpen — สร้าง custom menu "AI Assistant" ใน Sheets (สำหรับเปิด chatbot) */
+function onOpen(): void {
+  SpreadsheetApp.getUi()
+    .createMenu('AI Assistant')
+    .addItem('เปิด AI Chat', 'openChatSidebar')
+    .addToUi();
+}
+
 // export ทั้งหมดให้ esbuild (globalName: AppBundle) เปิดออกมา
 // build.mjs จะเติม footer ประกาศ global function จริง เพื่อให้ Apps Script
 // และ google.script.run มองเห็น (การ assign globalThis ไม่พอสำหรับ google.script.run)
@@ -165,4 +175,7 @@ export {
   deleteJob,
   testAI,
   summarizeInbox,
+  onOpen,
+  openChatSidebar,
+  chatWithAI,
 };

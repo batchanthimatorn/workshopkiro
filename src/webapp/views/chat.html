@@ -1,0 +1,50 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI','Noto Sans Thai',sans-serif;background:#f9f9f9;display:flex;flex-direction:column;height:100vh}
+.header{background:#222;color:#fff;padding:12px 16px;font-weight:700;font-size:.95rem}
+.messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:90%;padding:10px 14px;border-radius:12px;font-size:.88rem;line-height:1.6;word-wrap:break-word;white-space:pre-wrap}
+.msg.user{align-self:flex-end;background:#222;color:#fff;border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:#fff;border:1px solid #e0e0e0;color:#222;border-bottom-left-radius:4px}
+.msg.loading{color:#888;font-style:italic}
+.input-area{display:flex;gap:6px;padding:10px 12px;border-top:1px solid #e0e0e0;background:#fff}
+.input-area input{flex:1;border:1px solid #ddd;border-radius:8px;padding:10px 12px;font-size:.9rem;outline:none}
+.input-area input:focus{border-color:#222}
+.input-area button{background:#222;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer}
+.input-area button:hover{background:#444}
+.hint{font-size:.75rem;color:#888;padding:4px 12px 8px;text-align:center}
+</style>
+</head><body>
+<div class="header">AI Chat Assistant</div>
+<div class="messages" id="msgs">
+  <div class="msg ai">สวัสดีครับ ผมเป็นผู้ช่วย AI สำหรับ Google Sheets พิมพ์ถามอะไรก็ได้ เช่น:
+- "แก้สูตรใน D9"
+- "สร้างสูตรหาค่าเฉลี่ย B2:B8"
+- "วิเคราะห์ข้อมูลที่เลือก"
+- "สร้างกราฟจาก A1:D6"
+- "VLOOKUP ใช้ยังไง"</div>
+</div>
+<div class="hint">AI จะอ่าน cells ที่คุณเลือกอยู่ + ตอบคำถาม + แก้ Sheet ให้ได้</div>
+<div class="input-area">
+  <input id="inp" type="text" placeholder="พิมพ์คำถาม/คำสั่งให้ AI..." onkeydown="if(event.key==='Enter')send()"/>
+  <button onclick="send()">ส่ง</button>
+</div>
+<script>
+function addMsg(text,cls){var d=document.createElement('div');d.className='msg '+cls;d.textContent=text;document.getElementById('msgs').appendChild(d);d.scrollIntoView({behavior:'smooth'});return d;}
+function send(){
+  var inp=document.getElementById('inp');
+  var text=inp.value.trim();if(!text)return;
+  addMsg(text,'user');inp.value='';
+  var loading=addMsg('กำลังคิด...','ai loading');
+  google.script.run.withSuccessHandler(function(r){
+    loading.remove();
+    if(r&&r.ok)addMsg(r.data,'ai');
+    else addMsg('Error: '+(r&&r.error&&r.error.message||'ไม่ทราบสาเหตุ'),'ai');
+  }).withFailureHandler(function(e){
+    loading.remove();addMsg('Error: '+e.message,'ai');
+  }).chatWithAI(text);
+}
+</script>
+</body></html>

@@ -8,6 +8,7 @@ import { automationService } from '../services/AutomationService';
 import { summaryService } from '../services/SummaryService';
 import { draftService } from '../services/DraftService';
 import { ConfigRepository } from '../data/repositories';
+import { getAIProvider } from '../ai/AIProvider';
 import { ApiResult, ConfigItem, PromptTemplate, Frequency, Destination, JobStatus } from '../types';
 import { genRequestId } from '../core/logger';
 import { AppError, toUserMessage } from '../core/errors';
@@ -166,5 +167,31 @@ export function testAI(input: {
     }
     const res = summaryService.summarize({ content: input.content, lang: input.lang as 'th' | 'en', userEmail: email });
     return { result: res.result, model: res.model, tokens: res.tokens };
+  });
+}
+
+
+/** เปิด Sidebar chatbot ใน Sheets */
+export function openChatSidebar(): void {
+  const html = HtmlService.createHtmlOutputFromFile('chat')
+    .setTitle('AI Chat Assistant')
+    .setWidth(360);
+  SpreadsheetApp.getUi().showSidebar(html);
+}
+
+/** Chat handler — รับข้อความจาก sidebar แล้วตอบ (อ่าน cells ที่เลือกด้วย) */
+export function chatWithAI(message: string): ApiResult<string> {
+  return guard(() => {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const range = ss.getActiveRange();
+    let context = '';
+    if (range) {
+      const vals = range.getValues();
+      const formulas = range.getFormulas();
+      context = `[Selected: ${range.getA1Notation()} on "${range.getSheet().getName()}"]\nValues:\n${vals.map((r: unknown[]) => r.join('\t')).join('\n')}\nFormulas:\n${formulas.map((r: string[]) => r.join('\t')).join('\n')}\n\n`;
+    }
+    const prompt = `คุณเป็นผู้ช่วย AI สำหรับ Google Sheets ตอบเป็นภาษาไทย ช่วยแก้สูตร วิเคราะห์ข้อมูล สร้างกราฟ ได้หมด\n\n${context}คำถาม: ${message}`;
+    const res = getAIProvider().generate({ task: 'summarize', content: message, prompt, lang: 'th' });
+    return res.result;
   });
 }

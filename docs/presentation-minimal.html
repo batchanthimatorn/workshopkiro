@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>APP-03 AI Workspace Automation</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{--bg:#0a0a0a;--surface:#141414;--border:#222;--text:#f5f5f5;--muted:#888;--accent:#fff;--card-r:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh}
+.deck{position:relative;width:100%;height:100vh}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 48px;opacity:0;transform:scale(.97);transition:opacity .6s ease,transform .6s ease;pointer-events:none;overflow-y:auto}
+.slide.active{opacity:1;transform:scale(1);pointer-events:auto}
+.slide h1{font-size:3rem;font-weight:900;letter-spacing:-.03em;margin-bottom:12px}
+.slide h2{font-size:1.8rem;font-weight:700;margin-bottom:20px;letter-spacing:-.02em}
+.slide p{font-size:1rem;line-height:1.9;color:var(--muted);max-width:700px;text-align:center}
+.slide ul{list-style:none;padding:0;text-align:left;max-width:600px}
+.slide li{padding:8px 0;border-bottom:1px solid var(--border);color:var(--muted);font-size:.95rem}
+.slide li::before{content:'— ';color:#555}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-r);padding:28px;max-width:800px;width:100%}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;max-width:900px;width:100%}
+.g-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-r);padding:22px;text-align:center;transition:border-color .3s,transform .3s}
+.g-card:hover{border-color:#444;transform:translateY(-3px)}
+.g-card h3{font-size:.9rem;font-weight:700;margin-top:10px;color:var(--text)}
+.g-card p{font-size:.78rem;color:var(--muted);margin-top:4px}
+.diagram{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-r);padding:28px;max-width:900px;width:100%;overflow-x:auto}
+.fb{display:inline-flex;align-items:center;gap:4px;background:#1a1a1a;border:1px solid #333;padding:7px 14px;border-radius:8px;font-size:.82rem;font-weight:600;color:var(--text);margin:4px}
+.fa{color:#555;margin:0 3px;font-size:1rem}
+.tag{display:inline-block;background:#1a1a1a;border:1px solid #333;padding:3px 10px;border-radius:8px;font-size:.72rem;color:var(--muted);margin:2px}
+.progress{position:fixed;bottom:0;left:0;height:2px;background:var(--text);transition:width .4s;z-index:99}
+.slide-num{position:fixed;bottom:14px;right:20px;font-size:.75rem;color:#555;font-weight:600;z-index:99}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:800px;width:100%}
+.er-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;font-size:.78rem}
+.er-box{background:var(--surface);border:1px solid #333;border-radius:12px;padding:14px}
+.er-box strong{color:var(--text);font-size:.85rem}
+@media(max-width:768px){.slide{padding:32px 20px}.slide h1{font-size:2rem}.two-col,.er-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="slide-num" id="slideNum"></div>
+<div class="deck" id="deck">
+
+<!-- 1 Title -->
+<div class="slide active">
+  <h1>AI Workspace<br>Automation</h1>
+  <p>ระบบผู้ช่วยงานอัตโนมัติบน Google Workspace ด้วย AI</p>
+  <div style="margin-top:20px"><span class="tag">APP-03</span> <span class="tag">TypeScript + clasp</span> <span class="tag">Gemini AI</span></div>
+</div>
+
+<!-- 2 Overview -->
+<div class="slide">
+  <h2>Project Overview</h2>
+  <ul>
+    <li>Add-on ผู้ช่วย AI ฝังใน Gmail / Docs / Sheets</li>
+    <li>สรุปอีเมล + ร่างข้อความด้วย Gemini (ไม่ส่งเอง)</li>
+    <li>Sheets AI: วิเคราะห์ / สร้างสูตร / แก้สูตร / กราฟ / แปล</li>
+    <li>Dashboard + Health Check + Auto-refresh 30 วิ</li>
+    <li>Code-first: TypeScript + esbuild + clasp + CI/CD</li>
+  </ul>
+</div>
+
+<!-- 3 Business Goal -->
+<div class="slide">
+  <h2>Business Goal</h2>
+  <div class="grid">
+    <div class="g-card"><i data-lucide="zap" style="width:28px;height:28px;color:#fff"></i><h3>เร็วขึ้น 10x</h3><p>สรุป/ร่างอีเมลภายใน 15 วิ</p></div>
+    <div class="g-card"><i data-lucide="shield" style="width:28px;height:28px;color:#fff"></i><h3>ปลอดภัย</h3><p>HITL + PDPA + Audit</p></div>
+    <div class="g-card"><i data-lucide="sparkles" style="width:28px;height:28px;color:#fff"></i><h3>AI ช่วยงาน</h3><p>Gemini + OpenRouter</p></div>
+    <div class="g-card"><i data-lucide="code-2" style="width:28px;height:28px;color:#fff"></i><h3>Code-first</h3><p>TS + Git + CI/CD</p></div>
+  </div>
+</div>
+
+<!-- 4 Problem & Solution -->
+<div class="slide">
+  <h2>Problem & Solution</h2>
+  <div class="two-col">
+    <div class="card"><h3 style="color:#f44;margin-bottom:10px;font-size:.9rem">PROBLEM</h3><ul><li>อ่านอีเมลยาวเสียเวลา</li><li>สลับเครื่องมือหลายตัว</li><li>สูตร Sheets พังแก้ไม่ถูก</li><li>GAS ควบคุมเวอร์ชันยาก</li></ul></div>
+    <div class="card"><h3 style="color:#4f4;margin-bottom:10px;font-size:.9rem">SOLUTION</h3><ul><li>AI สรุป/ร่าง/แปลในที่เดียว</li><li>แก้สูตรอัตโนมัติ (1 กด)</li><li>Code-first + rollback ได้</li><li>Dashboard ภาพรวมทั้งหมด</li></ul></div>
+  </div>
+</div>
+
+<!-- 5 Features -->
+<div class="slide">
+  <h2>Key Features</h2>
+  <div class="grid">
+    <div class="g-card"><i data-lucide="mail" style="width:24px;height:24px;color:#fff"></i><h3>สรุปอีเมล</h3></div>
+    <div class="g-card"><i data-lucide="pen-line" style="width:24px;height:24px;color:#fff"></i><h3>ร่างข้อความ</h3></div>
+    <div class="g-card"><i data-lucide="table-2" style="width:24px;height:24px;color:#fff"></i><h3>Sheets AI</h3></div>
+    <div class="g-card"><i data-lucide="wrench" style="width:24px;height:24px;color:#fff"></i><h3>แก้สูตรอัตโนมัติ</h3></div>
+    <div class="g-card"><i data-lucide="bar-chart-3" style="width:24px;height:24px;color:#fff"></i><h3>Report + กราฟ</h3></div>
+    <div class="g-card"><i data-lucide="activity" style="width:24px;height:24px;color:#fff"></i><h3>Dashboard</h3></div>
+  </div>
+</div>
+
+<!-- 6 Architecture -->
+<div class="slide">
+  <h2>Architecture</h2>
+  <div class="diagram" style="text-align:center;line-height:2.4">
+    <span class="fb">Gmail / Docs / Sheets</span><br>
+    <span class="fa">▼</span><br>
+    <span class="fb">Add-on (CardService)</span> <span class="fa">|</span> <span class="fb">Web App (Dashboard)</span><br>
+    <span class="fa">▼</span><br>
+    <span class="fb">Auth + SecurityFilter</span><br>
+    <span class="fa">▼</span><br>
+    <span class="fb">Service Layer</span><br>
+    <span class="fa">▼</span><br>
+    <span class="fb">AIProvider</span> <span class="fa">→</span> <span class="fb">Gemini / OpenRouter</span><br>
+    <span class="fa">▼</span><br>
+    <span class="fb">Google Sheets (6 tabs)</span>
+  </div>
+</div>
+
+<!-- 7 Tech Stack -->
+<div class="slide">
+  <h2>Tech Stack</h2>
+  <div class="grid" style="max-width:600px">
+    <div class="g-card"><h3>TypeScript</h3><p>+ esbuild bundle</p></div>
+    <div class="g-card"><h3>Apps Script</h3><p>V8 runtime</p></div>
+    <div class="g-card"><h3>Gemini AI</h3><p>+ OpenRouter fallback</p></div>
+    <div class="g-card"><h3>Google Sheets</h3><p>Data store (6 tabs)</p></div>
+    <div class="g-card"><h3>clasp</h3><p>push/deploy/rollback</p></div>
+    <div class="g-card"><h3>GitHub Actions</h3><p>CI/CD pipeline</p></div>
+  </div>
+</div>
+
+<!-- 8 Business Workflow -->
+<div class="slide">
+  <h2>Business Workflow</h2>
+  <div class="diagram" style="text-align:center;line-height:2.6">
+    <span class="fb">เปิดอีเมล/Sheet</span>
+    <span class="fa">→</span>
+    <span class="fb">กด Add-on</span>
+    <span class="fa">→</span>
+    <span class="fb">เลือกฟังก์ชัน</span><br>
+    <span class="fa">▼</span><br>
+    <span class="fb">ตรวจ Sensitive Data</span>
+    <span class="fa">→</span>
+    <span class="fb">ส่ง AI</span>
+    <span class="fa">→</span>
+    <span class="fb">แสดงผล / ยืนยัน</span><br>
+    <span class="fa">▼</span><br>
+    <span class="fb">Log (Audit)</span>
+    <span class="fa">→</span>
+    <span class="fb">Dashboard อัปเดต</span>
+  </div>
+</div>
+
+<!-- 9 Role Workflow -->
+<div class="slide">
+  <h2>Role Workflow</h2>
+  <div class="two-col">
+    <div class="card"><h3 style="font-size:.85rem;margin-bottom:8px">End User</h3><p style="text-align:left;font-size:.82rem">เปิดอีเมล → สรุป/ร่าง → ตรวจ → ส่ง Draft<br>เปิด Sheet → วิเคราะห์/แก้สูตร/กราฟ</p></div>
+    <div class="card"><h3 style="font-size:.85rem;margin-bottom:8px">Admin</h3><p style="text-align:left;font-size:.82rem">ตั้ง Config / Banned Keywords<br>ดู Dashboard + Audit + Health</p></div>
+    <div class="card"><h3 style="font-size:.85rem;margin-bottom:8px">Developer</h3><p style="text-align:left;font-size:.82rem">TypeScript → push → deploy (clasp)<br>CI/CD + Deployment Log</p></div>
+    <div class="card"><h3 style="font-size:.85rem;margin-bottom:8px">Automation Owner</h3><p style="text-align:left;font-size:.82rem">สร้าง Job → ตั้งเวลา<br>ผลลง AutoResults Sheet</p></div>
+  </div>
+</div>
+
+<!-- 10 ER Diagram -->
+<div class="slide">
+  <h2>ER Diagram</h2>
+  <div class="diagram">
+    <div class="er-grid">
+      <div class="er-box"><strong>Logs</strong><br>PK: logId<br>timestamp, userMasked<br>jobType, model, status</div>
+      <div class="er-box"><strong>Config</strong><br>PK: key<br>value, category</div>
+      <div class="er-box"><strong>Prompts</strong><br>PK: templateId<br>name, taskType<br>promptText, active</div>
+      <div class="er-box"><strong>Jobs</strong><br>PK: jobId<br>FK: templateId<br>frequency, status</div>
+      <div class="er-box"><strong>Dashboard</strong><br>PK: period<br>aiCalls, tokens<br>failures</div>
+      <div class="er-box"><strong>Deployments</strong><br>PK: deploymentId<br>version, note<br>status</div>
+    </div>
+    <p style="margin-top:14px;font-size:.8rem;color:#666;text-align:center">Jobs.templateId → Prompts (1:N) | Jobs run → Logs (1:N) | Logs aggregate → Dashboard</p>
+  </div>
+</div>
+
+<!-- 11 Data Flow -->
+<div class="slide">
+  <h2>Data Flow</h2>
+  <div class="diagram" style="text-align:center;line-height:2.6">
+    <span class="fb">User</span>
+    <span class="fa">→</span>
+    <span class="fb">Add-on UI</span>
+    <span class="fa">→</span>
+    <span class="fb">Service</span>
+    <span class="fa">→</span>
+    <span class="fb">AI API</span><br>
+    <span class="fa" style="margin-left:300px">↓ response</span><br>
+    <span class="fb">Sheet (Log)</span>
+    <span class="fa">←</span>
+    <span class="fb">Result Card</span>
+    <span class="fa">←</span>
+    <span class="fb">AI Response</span>
+  </div>
+</div>
+
+<!-- 12 Security -->
+<div class="slide">
+  <h2>Security</h2>
+  <div class="grid" style="max-width:600px">
+    <div class="g-card"><h3>HITL</h3><p>Draft only ไม่ส่งเอง</p></div>
+    <div class="g-card"><h3>Filter</h3><p>Banned keywords</p></div>
+    <div class="g-card"><h3>Audit</h3><p>Log ไม่เก็บ PII</p></div>
+    <div class="g-card"><h3>Secret</h3><p>Script Properties</p></div>
+  </div>
+</div>
+
+<!-- 13 Roadmap -->
+<div class="slide">
+  <h2>Roadmap</h2>
+  <div class="diagram" style="text-align:center">
+    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">
+      <span class="fb">Context</span><span class="fa">→</span>
+      <span class="fb">Requirements</span><span class="fa">→</span>
+      <span class="fb">Design</span><span class="fa">→</span>
+      <span class="fb">Tasks</span><span class="fa">→</span>
+      <span class="fb">Implement</span><span class="fa">→</span>
+      <span class="fb">Test</span><span class="fa">→</span>
+      <span class="fb">Deploy</span>
+    </div>
+    <p style="margin-top:16px;font-size:.85rem;color:#666">AI-DLC Workflow — ครบ 7 เฟส ใน 1 session</p>
+  </div>
+</div>
+
+<!-- 14 Closing -->
+<div class="slide">
+  <h1 style="font-size:3.5rem">Done.</h1>
+  <p style="margin-top:12px">AI Workspace Automation (APP-03)</p>
+  <div style="margin-top:24px"><span class="tag">github.com/batchanthimatorn/workshopkiro</span></div>
+</div>
+
+</div>
+<script>
+lucide.createIcons();
+const slides=document.querySelectorAll('.slide');let cur=0;
+function show(n){n=Math.max(0,Math.min(slides.length-1,n));slides[cur].classList.remove('active');cur=n;slides[cur].classList.add('active');document.getElementById('progress').style.width=((cur/(slides.length-1))*100)+'%';document.getElementById('slideNum').textContent=(cur+1)+'/'+slides.length;}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')show(cur+1);if(e.key==='ArrowLeft')show(cur-1);});
+document.addEventListener('wheel',e=>{e.deltaY>0?show(cur+1):show(cur-1);},{passive:true});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;});document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(dx<-50)show(cur+1);if(dx>50)show(cur-1);});
+show(0);
+</script>
+</body>
+</html>

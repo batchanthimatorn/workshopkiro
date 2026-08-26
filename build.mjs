@@ -10,7 +10,7 @@ mkdirSync(OUT_DIR, { recursive: true });
 // รายชื่อฟังก์ชันที่ Apps Script/google.script.run ต้องเรียกได้ (ตรงกับ export ใน main.ts)
 const GLOBAL_FUNCS = [
   'onHomepage', 'onGmailMessageOpen', 'onDocsOpen', 'onSummarize', 'onDraft', 'onConfirmSensitive', 'onSummarizeInbox',
-  'onSheetsHome', 'onSheetAnalyze', 'onSheetFormula', 'onSheetTranslate', 'onSheetReport', 'onSheetCheck', 'onSheetFixFormula', 'onSheetReportChart',
+  'onSheetsHome', 'onSheetAnalyze', 'onSheetFormula', 'onSheetTranslate', 'onSheetReport', 'onSheetCheck', 'onSheetFixFormula', 'onSheetReportChart', 'onSheetConfirmFix',
   'doGet', 'doPost', 'runScheduledJob', 'setup',
   'getDashboardData', 'getHealthStatus', 'listConfig', 'saveConfig', 'listPrompts', 'savePrompt',
   'listJobs', 'createJob', 'updateJob', 'deleteJob', 'testAI', 'summarizeInbox',

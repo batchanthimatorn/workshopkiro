@@ -27,6 +27,7 @@ import {
   handleSheetCheck,
   handleSheetFixFormula,
   handleSheetReportChart,
+  handleSheetConfirmFix,
 } from './addon/sheets-handlers';
 import {
   webAppGet,
@@ -94,6 +95,9 @@ function onSheetFixFormula(e: unknown): GoogleAppsScript.Card_Service.ActionResp
 function onSheetReportChart(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
   return handleSheetReportChart(e as Record<string, unknown>);
 }
+function onSheetConfirmFix(e: unknown): GoogleAppsScript.Card_Service.ActionResponse {
+  return handleSheetConfirmFix(e as Record<string, unknown>);
+}
 
 function doGet(e: unknown): GoogleAppsScript.HTML.HtmlOutput {
   return webAppGet(e);
@@ -144,6 +148,7 @@ export {
   onSheetCheck,
   onSheetFixFormula,
   onSheetReportChart,
+  onSheetConfirmFix,
   doGet,
   doPost,
   runScheduledJob,

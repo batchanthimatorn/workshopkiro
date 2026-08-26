@@ -126,53 +126,106 @@ export function handleSheetFixFormula(_e: GasEvent): ActionResponse {
     const numRows = range.getNumRows();
     const numCols = range.getNumColumns();
 
-    // หา cells ที่มีสูตร + ค่าเป็น error (#NAME?, #REF!, #VALUE!, #ERROR!)
-    const broken: Array<{ row: number; col: number; formula: string; error: string }> = [];
+    const broken: Array<{ row: number; col: number; formula: string; error: string; cell: string }> = [];
     for (let r = 0; r < numRows; r++) {
       for (let c = 0; c < numCols; c++) {
         const f = formulas[r][c];
         const v = String(values[r][c]);
-        if (f && (v.startsWith('#') || v === '')) {
-          broken.push({ row: r, col: c, formula: f, error: v });
+        if (f && v.startsWith('#')) {
+          const cell = range.getCell(r + 1, c + 1).getA1Notation();
+          broken.push({ row: r, col: c, formula: f, error: v, cell });
         }
       }
     }
 
     if (broken.length === 0) return notify('ไม่พบสูตรที่มี error ใน cells ที่เลือก');
 
-    // ส่งให้ AI แก้
-    const prompt = `แก้สูตร Google Sheets ต่อไปนี้ที่มี error ตอบเฉพาะสูตรที่แก้แล้ว (บรรทัดละ 1 สูตร ตามลำดับ ไม่ต้องมีคำอธิบาย):\n\n` +
-      broken.map((b, i) => `${i + 1}. ${b.formula} → error: ${b.error}`).join('\n');
+    // ส่งให้ AI วิเคราะห์ + แนะนำสูตรที่แก้
+    const prompt = `ตรวจสูตร Google Sheets ต่อไปนี้ที่มี error แต่ละข้อให้ตอบ 3 บรรทัด:
+1. สาเหตุ: (อธิบายสั้นๆ)
+2. แก้เป็น: (สูตรที่ถูก)
+3. ---
+
+สูตรที่ต้องตรวจ:
+` + broken.map((b, i) => `${i + 1}. cell ${b.cell}: ${b.formula} → error: ${b.error}`).join('\n');
 
     const res = getAIProvider().generate({ task: 'summarize', content: prompt, prompt, lang: 'th' });
 
-    // parse ผลจาก AI (แต่ละบรรทัดเป็นสูตรที่แก้แล้ว)
-    const lines = res.result.split('\n').map(l => l.replace(/^\d+\.\s*/, '').trim()).filter(l => l.startsWith('='));
+    // แสดงผลวิเคราะห์ + ปุ่มยืนยัน
+    const analysisText = broken.map((b) => `Cell ${b.cell}\n  สูตรเดิม: ${b.formula}\n  Error: ${b.error}`).join('\n\n');
+
+    // เก็บข้อมูลสำหรับขั้นยืนยัน (ใน cache)
+    const fixData = { sheetName: range.getSheet().getName(), rangeA1: range.getA1Notation(), broken, aiResult: res.result };
+    const cache = CacheService.getUserCache() ?? CacheService.getScriptCache();
+    const token = Utilities.getUuid();
+    if (cache) cache.put(`fix_${token}`, JSON.stringify(fixData), 300);
+
+    const section = CardService.newCardSection()
+      .addWidget(CardService.newTextParagraph().setText(`พบสูตร error ${broken.length} จุด:\n\n${analysisText}`))
+      .addWidget(CardService.newDivider())
+      .addWidget(CardService.newTextParagraph().setText(`AI วิเคราะห์:\n${res.result}`))
+      .addWidget(CardService.newDivider())
+      .addWidget(
+        CardService.newTextButton()
+          .setText('ยืนยันแก้ไขสูตร')
+          .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
+          .setOnClickAction(CardService.newAction().setFunctionName('onSheetConfirmFix').setParameters({ token })),
+      );
+
+    return CardService.newActionResponseBuilder()
+      .setNavigation(CardService.newNavigation().pushCard(
+        CardService.newCardBuilder()
+          .setHeader(CardService.newCardHeader().setTitle('วิเคราะห์สูตร').setSubtitle(`พบ error ${broken.length} จุด`))
+          .addSection(section)
+          .build()
+      ))
+      .build();
+  } catch (err) {
+    logger.error('sheet fix formula failed', {});
+    return notify(toUserMessage(err));
+  }
+}
+
+// ---- ยืนยันแก้ไขสูตร (เขียนกลับ cell จริง) ----
+export function handleSheetConfirmFix(e: GasEvent): ActionResponse {
+  try {
+    const token = e?.commonEventObject?.parameters?.token || e?.parameters?.token || '';
+    const cache = CacheService.getUserCache() ?? CacheService.getScriptCache();
+    const raw = cache ? cache.get(`fix_${token}`) : null;
+    if (!raw) return notify('เซสชันหมดอายุ กรุณากดแก้สูตรอีกครั้ง');
+
+    const fixData = JSON.parse(raw) as { sheetName: string; broken: Array<{ row: number; col: number; formula: string }>; aiResult: string };
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sh = ss.getSheetByName(fixData.sheetName);
+    if (!sh) return notify('ไม่พบ sheet');
+
+    const range = sh.getActiveRange();
+    if (!range) return notify('ไม่พบ range');
+
+    // parse สูตรที่แก้แล้วจาก AI result (หาบรรทัดที่ขึ้นต้น = )
+    const lines = fixData.aiResult.split('\n');
+    const fixedFormulas: string[] = [];
+    for (const line of lines) {
+      const match = line.match(/แก้เป็น:\s*(=.+)/i) || line.match(/^(=.+)/);
+      if (match) fixedFormulas.push(match[1].trim());
+    }
 
     let fixed = 0;
-    for (let i = 0; i < Math.min(broken.length, lines.length); i++) {
-      const b = broken[i];
-      const newFormula = lines[i];
+    for (let i = 0; i < Math.min(fixData.broken.length, fixedFormulas.length); i++) {
+      const b = fixData.broken[i];
+      const newFormula = fixedFormulas[i];
       if (newFormula && newFormula !== b.formula) {
         range.getCell(b.row + 1, b.col + 1).setFormula(newFormula);
         fixed++;
       }
     }
 
-    auditLogger.logUsage({
-      userEmail: currentEmail(), role: 'end_user', jobType: 'other',
-      model: res.model, status: 'success', tokens: res.tokens,
-      durationMs: 0, requestId: genRequestId(),
-    });
-
     return pushCard(resultCard(
-      `แก้สูตรสำเร็จ (${fixed}/${broken.length})`,
-      `สูตรที่พบ error: ${broken.length}\nแก้ไขแล้ว: ${fixed}\n\n` +
-      broken.map((b, i) => `${b.formula} → ${lines[i] || '(ไม่ได้แก้)'}`).join('\n') +
-      `\n\n[model: ${res.model}]`
+      `แก้ไขสำเร็จ (${fixed}/${fixData.broken.length})`,
+      fixData.broken.map((b, i) => `${b.formula} → ${fixedFormulas[i] || '(ไม่ได้แก้)'}`).join('\n')
     ));
   } catch (err) {
-    logger.error('sheet fix formula failed', {});
+    logger.error('sheet confirm fix failed', {});
     return notify(toUserMessage(err));
   }
 }
